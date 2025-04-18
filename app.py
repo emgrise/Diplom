@@ -50,8 +50,16 @@ def modal():
         if not row:
             return "Effect not found", 404
 
-        # row[0] — это поле 'code'
-        return render_template_string(row[0])  # ВОТ ТУТ БЫЛА ОШИБКА (row['code'])
+        original_code = row[0]
+        style_block = """
+        <style>
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        </style>
+        """
     
         if "<head>" in original_code:
             modified_code = original_code.replace("<head>", "<head>" + style_block)
