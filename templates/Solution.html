@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>DataBase.solution</title>
+    <link href="styles/style_sol.css" rel="stylesheet" type="text/css">
+    <meta charset="UTF-8">
+</head>
+
+<body >
+    
+    <header>
+        <div class="text-3d">Solution</div>
+
+        <a href='Index.html'>Back</a>
+        
+    </header>
+
+    <main>
+        <div class="wrapper">
+        <div class='row'>
+        <div class="col">
+
+        </div>
+
+        <div class="col">
+        </div>
+        </div>
+
+        <div class='row'>
+        <div class="col">
+
+        </div>
+
+        <div class="col">
+        </div>
+
+        </div>
+        </div>
+    </main>
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <button class="fullscreen-btn" id="fullscreenBtn"></button>
+                <button class="close-btn" id="closeModal"> </button>
+            </div>
+            <iframe src="{{ url_for('static', filename='Modal/modal.html') }}"></iframe>
+            <div class="resize-handle top"></div>
+            <div class="resize-handle bottom"></div>
+            <div class="resize-handle left"></div>
+            <div class="resize-handle right"></div>
+            <div class="resize-handle corner top-left"></div>
+            <div class="resize-handle corner top-right"></div>
+            <div class="resize-handle corner bottom-left"></div>
+            <div class="resize-handle corner bottom-right"></div>
+        </div>
+        <!-- Resize handles -->
+
+    </div>
+    </div>
+
+    </div>
+    <script src="Modal/ModJS.js"></script>
+</body>
+
+</html>

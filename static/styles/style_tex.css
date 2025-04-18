@@ -1,0 +1,131 @@
+body {
+    margin: 0;
+}
+.text-background {
+    position: fixed;
+    top: 100px;
+    left: 10px;
+    width: calc(100% - 20px);
+    height: calc(100% - 110px);
+    z-index: 0;
+    color: rgba(0, 0, 0);
+    font-size: 30px;
+    text-align: justify;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.5;
+    pointer-events: none;
+    
+    
+}
+.card {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    padding: 20px;
+    margin: 10px;
+    z-index: 1;
+    float: left; 
+    shape-outside: rectangle(0, 0, 200px, 200px);
+    
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    
+}
+header {
+    height: 100px;
+    width: 100%;
+    background-color: black;
+    position: fixed;
+    color: white;
+    z-index: 10;
+}
+
+#he {margin: 15px 20px;
+    width: 200px;
+    font-size: 48px;
+}
+.dot_style:first-child::before{ display: none;}
+
+.dot_style::before{
+    content: "•"; 
+    font-size: 0.8em; 
+    color: gray;
+    margin-right:12px; 
+    display: inline-block; 
+    vertical-align: middle;
+    
+} 
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -10px;
+}
+
+.col {
+    flex: 1 1 30%;
+    margin: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+a {position: fixed;
+    display: inline-block;
+    border-radius: 15px;
+    font-size: 60px;
+    padding: 10px;
+    background-color: #ff0000;
+    color: #ffffff;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    z-index: 10;
+    
+    top: 75px;
+    left: 30px;
+}
+
+a:hover {
+    background-color: #cc0000;
+    transform: scale(1.1);
+}
+
+a:active {
+    background-color: #990000;
+    transform: scale(0.95);
+}
+main {
+    height: auto;
+    padding-top: 180px;
+}
+
+
+
+.card img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px 8px 0 0;
+}
+
+.card h3 {
+    margin: 10px 0 0;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 0 0 8px 8px;
+}
+
+
+

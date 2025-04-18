@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>DataBase.animation</title>
+    <link href="{{ url_for('static', filename='styles/style_an.css') }}" rel="stylesheet" type="text/css">
+    <meta charset="UTF-8">
+    <style>.text-3d {
+        width: 100px;
+        font-size: 48px;
+        color: white;
+        text-align: right;
+        transform-style: preserve-3d;
+        animation: rotate3D 5s infinite linear;
+        perspective: 1000px;
+        transform-origin: center;
+    }
+    
+    @keyframes rotate3D {
+        0% {
+            transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+        }
+    
+        25% {
+            transform: rotateX(180deg) rotateY(0deg) rotateZ(0deg);
+        }
+    
+        50% {
+            transform: rotateX(360deg) rotateY(180deg) rotateZ(0deg);
+        }
+    
+        75% {
+            transform: rotateX(360deg) rotateY(360deg) rotateZ(180deg);
+        }
+    
+        100% {
+            transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+        }
+    }</style>
+</head>
+
+<body >
+    
+    <header>
+        <div class="text-3d">Animation</div>
+
+        <a href='Index.html'>Back</a>
+        
+    </header>
+
+    <main>
+        <div class="wrapper">
+        <div class='row'>
+        <div class="col">
+
+        </div>
+
+        <div class="col">
+        </div>
+        </div>
+
+        <div class='row'>
+        <div class="col">
+
+        </div>
+
+        <div class="col">
+        </div>
+
+        </div>
+        </div>
+    </main>
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <button class="fullscreen-btn" id="fullscreenBtn"></button>
+                <button class="close-btn" id="closeModal"> </button>
+            </div>
+            <iframe src="{{ url_for('static', filename='Modal/modal.html') }}"></iframe>
+            <div class="resize-handle top"></div>
+            <div class="resize-handle bottom"></div>
+            <div class="resize-handle left"></div>
+            <div class="resize-handle right"></div>
+            <div class="resize-handle corner top-left"></div>
+            <div class="resize-handle corner top-right"></div>
+            <div class="resize-handle corner bottom-left"></div>
+            <div class="resize-handle corner bottom-right"></div>
+        </div>
+        <!-- Resize handles -->
+
+    </div>
+    </div>
+
+    </div>
+    <script src="Modal/ModJS.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>DataBase.text</title>
+    <link href="styles/style_tex.css" rel="stylesheet" type="text/css">
+    <link href="Modal/ModCSS.css" rel="stylesheet" type="text/css">
+    <meta charset="UTF-8">
+    
+
+</head>
+
+<body>
+    
+    
+    <header>
+        <div id="he">
+            <span class="dot_style">T</span>
+            <span class="dot_style">e</span>
+            <span class="dot_style">x</span>
+            <span class="dot_style">t</span>
+        </div>
+
+
+        
+        
+    </header>
+    <a href='Index.html'>Back</a>
+    <main>
+     
+        <div class="wrapper">
+        <div class='row'>
+        <div class="col">
+            <button href="#" data-toggle="modal" data-target="#modalOverlay" class="card">
+                <img src="pic/Windows_Logo.jpg" id="Negative">
+                        <h3></h3>
+            </button>
+        </div>
+
+        <div class="col">
+            <button href="#" data-toggle="modal" data-target="#modalOverlay" class="card">
+                <img src="pic/Windows_Logo.jpg" id="Negative">
+                        <h3></h3>
+            </button>
+        </div>
+        </div>
+
+        <div class='row'>
+        <div class="col">
+            <button href="#" data-toggle="modal" data-target="#modalOverlay" class="card">
+                <img src="pic/Windows_Logo.jpg" id="Negative">
+                        <h3></h3>
+            </button>
+        </div>
+
+        <div class="col">
+        
+        <button href="#" data-toggle="modal" data-target="#modalOverlay" class="card">
+            <img src="pic/Windows_Logo.jpg" id="Negative">
+                        <h3></h3>
+        </button>
+        </div>
+        </div>
+    </main>
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <button class="fullscreen-btn" id="fullscreenBtn"></button>
+                <button class="close-btn" id="closeModal"> </button>
+            </div>
+            <iframe src="{{ url_for('static', filename='Modal/modal.html') }}"></iframe>
+            <div class="resize-handle top"></div>
+            <div class="resize-handle bottom"></div>
+            <div class="resize-handle left"></div>
+            <div class="resize-handle right"></div>
+            <div class="resize-handle corner top-left"></div>
+            <div class="resize-handle corner top-right"></div>
+            <div class="resize-handle corner bottom-left"></div>
+            <div class="resize-handle corner bottom-right"></div>
+        </div>
+        <!-- Resize handles -->
+
+    </div>
+    
+
+    <div class="text-background" id="text-bg"></div>
+    <script src="Modal/ModJS.js"></script>
+    <script>
+        const textBg = document.getElementById("text-bg");
+        const text = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quibusdam quo consequatur vitae! Ducimus repellat, quaerat sint voluptates, tenetur culpa repudiandae consectetur asperiores natus laudantium odit vitae. Sit perferendis consectetur tenetur!".repeat(14); 
+        textBg.innerText = text;
+    </script>
+</body>
+
+</html>

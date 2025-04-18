@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>DataBase.picture</title>
+    <link href="{{ url_for('static', filename='styles/style_pic.css')}}" rel="stylesheet" type="text/css">
+    <link href="{{ url_for('static', filename='Modal/ModCSS.css')}}" rel="stylesheet" type="text/css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8">
+</head>
+
+<body>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const images = [
+                'https://img.freepik.com/free-photo/mountains-lake_1398-1153.jpg?ga=GA1.1.1326420604.1736668653&semt=ais_hybrid',
+                'https://img.freepik.com/free-photo/vertical-low-angle-shot-skyscrapers-bright-sky-new-york-city-united-states_181624-9769.jpg?t=st=1738062677~exp=1738066277~hmac=3de23878a25abaeb2e04fd46231e81893764c72e6367e2bd061b5f4efef533fa&w=740',
+                'https://img.freepik.com/free-photo/fictional-planet-with-colourful-night-sky-stars-nebula_1048-7926.jpg?t=st=1738063024~exp=1738066624~hmac=7235952fe63a4edda22a0524ef80bb2e5b57efe3805836cfc5ac0f2ac3f7a5b1&w=996',
+                'https://img.freepik.com/free-photo/fantastic-seascape-with-ripples_1232-424.jpg?t=st=1738063067~exp=1738066667~hmac=ded5653ba760004784c930250310b3aa6a7ab406a89f8e3ca59cbf880e51eb84&w=1380',
+                'https://img.freepik.com/free-photo/flame-circle_1160-750.jpg?ga=GA1.1.1326420604.1736668653&semt=ais_hybrid'
+            ];
+
+            function getRandomImage() {
+                const randomIndex = Math.floor(Math.random() * images.length);
+                return images[randomIndex];
+            }
+
+            const randomImageElement = document.querySelector('body');
+            randomImageElement.style.background = `url(${getRandomImage()}) no-repeat center center fixed`;
+
+        });
+    </script>
+    <header>
+        <svg id="title" xmlns="http://www.w3.org/2000/svg" width="100%" height="100" viewBox="0 0 100% 100">
+            <g>
+                <path
+                    d="M17.27,5.57a25.56,25.56,0,0,0-5.74.49V25.11a20.42,20.42,0,0,0,5,.49c7.35,0,11.83-3.57,11.83-10.08C28.34,9.29,23.93,6.28,17.21,6.28Z" />
+                <path d="M186.88,18.03c-6.23,0-9,5.74-9.45,10h18C195.43,24.83,193.75,18.74,186.82,18.74Z" />
+                <path id="dynamicPath" />
+            </g>
+        </svg>
+        <script>
+            function updatePath() {
+                const path = document.getElementById("dynamicPath");
+                const screenWidth = window.innerWidth;
+                let p = `M0,0V90 H${screenWidth} v-90Zm30.73,26c-3.22,3.43-8.47,5.18-14.42,5.18a21,21,0,0,1-4.9-.42V49H5.38V2.36a70.58,70.58,0,0,1,11.69-.91c6,0,10.43,1.4,13.23,3.92a12.68,12.68,0,0,1,4.13,9.87C34.43,19.51,33.17,22.87,30.79,25.32ZM47.45,49H41.29V15.1h6.16ZM44.23,9.36a3.66,3.66,0,0,1-3.71-3.78,3.75,3.75,0,0,1,3.85-3.85,3.66,3.66,0,0,1,3.78,3.85A3.64,3.64,0,0,1,44.23,9.36Zm29,35.42a17.5,17.5,0,0,0,7.56-1.68l1,4.62a22.69,22.69,0,0,1-9.73,2c-10.22,0-16.87-6.93-16.87-17.29s7.14-18,18.2-18A20.59,20.59,0,0,1,82,16.15l-1.4,4.76a14.28,14.28,0,0,0-7.14-1.61c-7.77,0-12,5.74-12,12.81C61.45,40,66.49,44.78,73.21,44.78Zm33-25H97.36V38.06c0,4.2,1.19,6.58,4.62,6.58a13.7,13.7,0,0,0,3.57-.42l.28,4.62a15.08,15.08,0,0,1-5.46.84,8.54,8.54,0,0,1-6.65-2.59c-1.75-1.82-2.38-4.83-2.38-8.82V19.79H86.09V15.1h5.25V7l6-1.61V15.1h8.82ZM136.28,49l-.35-5.53h-.14a12.75,12.75,0,0,1-11.2,6.3c-5.32,0-11.69-2.94-11.69-14.84V15.1h6.16V33.86c0,6.44,2,10.78,7.56,10.78a8.91,8.91,0,0,0,8.12-5.6,9,9,0,0,0,.56-3.15V15.1h6.16V39.74c0,3.5.07,6.58.28,9.24Zm32.13-28.63a9.25,9.25,0,0,0-2.1-.21c-4.34,0-7.42,3.29-8.26,7.91a17.34,17.34,0,0,0-.28,2.87V49h-6.09V25.67c0-4-.07-7.42-.28-10.57h5.39l.21,6.65h.28c1.54-4.55,5.25-7.42,9.38-7.42a6.66,6.66,0,0,1,1.75.21ZM201.1,33.16H177.3c.14,8.33,5.46,11.76,11.62,11.76a22.28,22.28,0,0,0,9.38-1.75l1,4.41a27.44,27.44,0,0,1-11.27,2.1c-10.43,0-16.66-6.86-16.66-17.08s6-18.27,15.89-18.27c11.06,0,14,9.73,14,16A23.23,23.23,0,0,1,201.1,33.16Z`;
+                path.setAttribute("d", p);
+            }
+            updatePath();
+            window.addEventListener("resize", updatePath);
+        </script>
+<script>
+    document.querySelectorAll('.js-modal-trigger').forEach(button => {
+        button.addEventListener('click', () => {
+            const index = button.dataset.index;
+            document.getElementById('modalFrame').src = `/modal?index=${index}`;
+            
+        });
+    });
+    </script>
+
+
+    </header>
+    <a href="{{ url_for('Index') }}">Back</a>
+    <main>
+        <div class="wrapper">
+            <div class='row'>
+                {% for item in items %}
+                <div class="col">
+                    
+                    <button data-index="{{ loop.index0 }}" class="card js-modal-trigger">
+                        <img src="{{ url_for('static', filename='pic/' + item.image) }}" alt="Image">
+                        <h3>{{ item.description }}</h3>
+                    </button>
+                </div>
+                {% endfor %}
+                
+            
+            </div>
+        </div>
+    </main>
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <button class="fullscreen-btn" id="fullscreenBtn">Fullscreen</button>
+                <button class="close-btn" id="closeModal">× Close</button>
+            </div>
+            <iframe id="modalFrame" ></iframe>
+            <div class="resize-handle top"></div>
+            <div class="resize-handle bottom"></div>
+            <div class="resize-handle left"></div>
+            <div class="resize-handle right"></div>
+            <div class="resize-handle corner top-left"></div>
+            <div class="resize-handle corner top-right"></div>
+            <div class="resize-handle corner bottom-left"></div>
+            <div class="resize-handle corner bottom-right"></div>
+        </div>
+        <!-- Resize handles -->
+
+    </div>
+    
+
+    
+    <script src="{{ url_for('static', filename='Modal/ModJS.js')}}"></script>
+</body>
+
+</html>
