@@ -2,41 +2,176 @@
 <html lang="en">
 
 <head>
-    <title>Database of frontend styles and effects</title>
-    <link href="{{ url_for('static', filename='styles/style_Index.css') }}" rel="stylesheet" >
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Collection of modern web effects and animations">
+    <title>Web Effects Collection</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- AOS CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='styles/style_Index.css') }}" rel="stylesheet">
 </head>
 
-<body id="lightswap">
-<script src="{{ url_for('static', filename='JSDestructure.js') }}"></script>
-    <header>
-        <h1>Database of frontend styles and effects</h1>
-    </header>
-
-    <div class="container">
-        <div class="row">
-            <div class="button">
-                <a href="{{ url_for('Text') }}">Text</a>
-            </div>
-        </div>
-        <div class="row">
-            <div class="button">
-                <a href="{{ url_for('Picture') }}">Picture</a>
-            </div>
-        </div>
-        <div class="row">
-            <div class="button">
-                <a href="{{ url_for('Solution') }}">Solution</a>
-            </div>
-        </div>
-        <div class="row">
-            <div class="button">
-                <a href="{{ url_for('Animation') }}">Animation</a>
-            </div>
+<body>
+    <!-- Page Loader -->
+    <div class="page-loader">
+        <div class="loader-content">
+            <i class="fas fa-spinner fa-3x fa-spin"></i>
         </div>
     </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">Web Effects</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/text" aria-label="Text Effects">Text Effects</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/picture" aria-label="Picture Effects">Picture Effects</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/solution" aria-label="Solution Effects">Solution Effects</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/animation" aria-label="Animation Effects">Animation Effects</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <div class="theme-toggle me-3">
+                    <button class="btn btn-outline-light" aria-label="Toggle theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    </div>
+                    {% if session.get('user_id') %}
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user me-1"></i> Account
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
+                            <li><a class="dropdown-item" href="{{ url_for('cabinet') }}"><i class="fas fa-th-large me-2"></i>My Cabinet</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <div class="btn-group">
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-light me-2">Login</a>
+                        <a href="{{ url_for('register') }}" class="btn btn-primary">Register</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mt-5 pt-5">
+        <!-- Search Section -->
+        <section class="search-container mb-5" data-aos="fade-up">
+            <div class="input-group">
+                <input type="text" class="form-control search-input" placeholder="Search effects..." aria-label="Search effects">
+                <button class="btn btn-primary search-button" aria-label="Search">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Effects Grid -->
+        <div class="row g-4">
+            <!-- Text Effects -->
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+                <div class="effect-card card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-font fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Text Effects</h5>
+                        <p class="card-text">Explore our collection of modern text effects and animations.</p>
+                        <a href="/text" class="btn btn-primary">
+                            View Effects <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Picture Effects -->
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
+                <div class="effect-card card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-image fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Picture Effects</h5>
+                        <p class="card-text">Discover stunning image effects and transformations.</p>
+                        <a href="/picture" class="btn btn-primary">
+                            View Effects <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Solution Effects -->
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
+                <div class="effect-card card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-puzzle-piece fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Solution Effects</h5>
+                        <p class="card-text">Find practical solutions and interactive effects.</p>
+                        <a href="/solution" class="btn btn-primary">
+                            View Effects <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Animation Effects -->
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="400">
+                <div class="effect-card card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-film fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Animation Effects</h5>
+                        <p class="card-text">Experience smooth and engaging animations.</p>
+                        <a href="/animation" class="btn btn-primary">
+                            View Effects <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Web Effects Collection</h5>
+                    <p>Modern web effects and animations for your projects.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="social-links">
+                        <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 </body>
 
 </html>

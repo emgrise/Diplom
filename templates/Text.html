@@ -1,95 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.htm" %}
 
-<head>
-    <title>DataBase.text</title>
-    <link href="styles/style_tex.css" rel="stylesheet" type="text/css">
-    <link href="Modal/ModCSS.css" rel="stylesheet" type="text/css">
-    <meta charset="UTF-8">
-    
+{% block title %}Text Effects - Web Effects Collection{% endblock %}
 
-</head>
-
-<body>
-    
-    
-    <header>
-        <div id="he">
-            <span class="dot_style">T</span>
-            <span class="dot_style">e</span>
-            <span class="dot_style">x</span>
-            <span class="dot_style">t</span>
-        </div>
-
-
-        
-        
-    </header>
-    <a href='Index.html'>Back</a>
-    <main>
-     
-        <div class="wrapper">
-        <div class='row'>
-        <div class="col">
-            <button href="#" data-toggle="modal" data-target="#modalOverlay" class="card">
-                <img src="pic/Windows_Logo.jpg" id="Negative">
-                        <h3></h3>
-            </button>
-        </div>
-
-        <div class="col">
-            <button href="#" data-toggle="modal" data-target="#modalOverlay" class="card">
-                <img src="pic/Windows_Logo.jpg" id="Negative">
-                        <h3></h3>
-            </button>
-        </div>
-        </div>
-
-        <div class='row'>
-        <div class="col">
-            <button href="#" data-toggle="modal" data-target="#modalOverlay" class="card">
-                <img src="pic/Windows_Logo.jpg" id="Negative">
-                        <h3></h3>
-            </button>
-        </div>
-
-        <div class="col">
-        
-        <button href="#" data-toggle="modal" data-target="#modalOverlay" class="card">
-            <img src="pic/Windows_Logo.jpg" id="Negative">
-                        <h3></h3>
+{% block content %}
+<!-- Search Section -->
+<section class="search-container mb-5" data-aos="fade-up">
+    <div class="input-group">
+        <input type="text" class="form-control search-input" placeholder="Search text effects..." aria-label="Search effects">
+        <button class="btn btn-primary search-button" aria-label="Search">
+            <i class="fas fa-search"></i>
         </button>
-        </div>
-        </div>
-    </main>
-    <div id="modalOverlay" class="modal-overlay">
-        <div class="modal-container">
-            <div class="modal-header">
-                <button class="fullscreen-btn" id="fullscreenBtn"></button>
-                <button class="close-btn" id="closeModal"> </button>
-            </div>
-            <iframe src="{{ url_for('static', filename='Modal/modal.html') }}"></iframe>
-            <div class="resize-handle top"></div>
-            <div class="resize-handle bottom"></div>
-            <div class="resize-handle left"></div>
-            <div class="resize-handle right"></div>
-            <div class="resize-handle corner top-left"></div>
-            <div class="resize-handle corner top-right"></div>
-            <div class="resize-handle corner bottom-left"></div>
-            <div class="resize-handle corner bottom-right"></div>
-        </div>
-        <!-- Resize handles -->
-
     </div>
-    
+</section>
 
-    <div class="text-background" id="text-bg"></div>
-    <script src="Modal/ModJS.js"></script>
-    <script>
-        const textBg = document.getElementById("text-bg");
-        const text = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quibusdam quo consequatur vitae! Ducimus repellat, quaerat sint voluptates, tenetur culpa repudiandae consectetur asperiores natus laudantium odit vitae. Sit perferendis consectetur tenetur!".repeat(14); 
-        textBg.innerText = text;
-    </script>
-</body>
+<!-- Effects Grid -->
+<div class="row g-4">
+    {% for item in items %}
+    <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+        <div class="effect-card card h-100">
+            <img src="{{ url_for('static', filename=item.image) }}" class="card-img-top" alt="{{ item.description }}">
+            <div class="card-body text-center">
+                <h5 class="card-title">{{ item.description }}</h5>
+                <button class="btn btn-primary view-effect-btn" 
+                        data-type="text" 
+                        data-index="{{ loop.index0 }}">
+                    <i class="fas fa-eye me-2"></i>View Effect
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
 
-</html>
+{% block additional_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Обработчик клика по кнопке "View Effect"
+    document.querySelectorAll('.view-effect-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const effectType = this.dataset.type;
+            const effectIndex = this.dataset.index;
+            
+            fetch(`/generate_modal/${effectType}/${effectIndex}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    if (data.path) {
+                        window.openModal(data.path);
+                    } else {
+                        throw new Error('No path returned for effect');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error loading effect: ' + error.message);
+                });
+        });
+    });
+});
+</script>
+{% endblock %}

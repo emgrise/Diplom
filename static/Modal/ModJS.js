@@ -4,7 +4,45 @@ document.addEventListener('DOMContentLoaded', function () {
     const fullscreenBtn = document.getElementById('fullscreenBtn');
     const modalContainer = document.querySelector('.modal-container');
     const modalFrame = document.getElementById('modalFrame');
+    const copyBtn = document.getElementById('copyBtn');
+
+    // Add openModal function to window object
+    window.openModal = function(path) {
+        modalFrame.src = path;
+        modalOverlay.style.display = 'block';
+    };
     
+// Добавить обработчик копирования
+copyBtn.addEventListener('click', async () => {
+    try {
+        const modalFrame = document.getElementById('modalFrame');
+        const iframeDoc = modalFrame.contentDocument || modalFrame.contentWindow.document;
+        
+        // Get the code from the iframe's body
+        const code = iframeDoc.body.innerHTML;
+        
+        // Copy to clipboard
+        await navigator.clipboard.writeText(code);
+        
+        // Update button text to show success
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => {
+            copyBtn.textContent = 'Copy';
+        }, 2000);
+        
+    } catch (err) {
+        console.error('Copy failed:', err);
+        copyBtn.textContent = 'Error';
+        setTimeout(() => {
+            copyBtn.textContent = 'Copy';
+        }, 2000);
+    }
+});
+document.getElementById('fullscreenBtn').addEventListener('click', async () => {
+    if (fullscreenBtn.textContent == "⛶"){fullscreenBtn.textContent = '🗖';}
+    else {fullscreenBtn.textContent = '⛶';}
+
+});
     modalFrame.addEventListener('load', () => {
         try {
             const iframeDoc = modalFrame.contentDocument || modalFrame.contentWindow.document;
@@ -39,7 +77,13 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('modalFrame').src = '';
         modalContainer.style.width = '50%';
         modalContainer.style.height = '50%';
-    });
+        document.exitFullscreen();
+        modalContainer.mozCancelFullScreen();
+        modalContainer.webkitExitFullscreen();
+        modalContainer.msExitFullscreen();
+        })
+        
+    
 
     window.addEventListener('mousedown', function (event) {
         if (event.target === modalOverlay) {
@@ -170,23 +214,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-function adjustButtonText(button) {
-    const containerWidth = document.querySelector('.modal-header').offsetWidth;
-    
-    if (containerWidth < 300) {
-        button.innerHTML = button === closeModal ? "×" : "⛶";
-    }else if (document.fullscreenElement) {
-        fullscreenBtn.textContent = 'Windowed mode';
-    }
-    else if (!document.fullscreenElement) {
-        button.innerHTML = button === closeModal ? "× Close" : "Fullscreen";
-    }
-}
 
-
-
-// Отслеживаем изменения `.modal-header`
-const headerObserver = new ResizeObserver(updateButtons);
 
 document.addEventListener("DOMContentLoaded", () => {
     const header = document.querySelector(".modal-header");
