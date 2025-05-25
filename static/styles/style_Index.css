@@ -877,7 +877,7 @@ header,
     background-color: var(--card-bg);
     padding: 2rem 1rem;
     border-right: 1px solid var(--border-color);
-    z-index: 1040; /* Ensure it's above the default navbar z-index */
+    z-index: 11 !important; /* Ensure it's above the default navbar z-index */
     overflow-y: auto;
 }
 
@@ -980,23 +980,7 @@ body.has-sidebar header {
     z-index: 11 !important;
 }
 
-.sidebar {
-    position: fixed;
-    left: 0;
-    top: 0; /* Position at the very top */
-    bottom: 0;
-    width: 250px;
-    background-color: var(--card-bg);
-    padding: 2rem 1rem; /* Adjusted padding */
-    border-right: 1px solid var(--border-color);
-    z-index: 1040; /* Higher than typical fixed navbar z-index */
-    overflow-y: auto;
-}
 
-.sidebar h2 {
-    margin-bottom: 2rem;
-    color: var(--text-color);
-}
 
 .filter-buttons {
     display: flex;
@@ -1015,27 +999,13 @@ body.has-sidebar header {
     padding: 90px 2rem 2rem 2rem; /* Keep top padding to clear navbar */
 }
 
-@media (max-width: 768px) {
-    .sidebar {
-        width: 100%;
-        position: relative;
-        top: auto;
-        border-right: none;
-        border-bottom: 1px solid var(--border-color);
-        padding: 1rem;
-    }
-    
-    .main-content {
-        margin-left: 0;
-        padding: 2rem 1rem;
-    }
-}
+
 
 /* Ensure fixed navbar does not cover sidebar content */
 .navbar.fixed-top {
-    margin-left: 250px; /* Shift navbar to the right of the sidebar */
-    width: calc(100% - 250px); /* Adjust width to fit next to sidebar */
-    z-index: 1030; /* Default Bootstrap z-index for fixed-top */
+     /* Shift navbar to the right of the sidebar */
+    width: 100% ; /* Adjust width to fit next to sidebar */
+    z-index: 1; /* Default Bootstrap z-index for fixed-top */
 }
 
 @media (max-width: 768px) {

@@ -11,38 +11,81 @@ document.addEventListener('DOMContentLoaded', function () {
         modalFrame.src = path;
         modalOverlay.style.display = 'block';
     };
-    
-// Добавить обработчик копирования
-copyBtn.addEventListener('click', async () => {
-    try {
-        const modalFrame = document.getElementById('modalFrame');
-        const iframeDoc = modalFrame.contentDocument || modalFrame.contentWindow.document;
-        
-        // Get the code from the iframe's body
-        const code = iframeDoc.body.innerHTML;
-        
-        // Copy to clipboard
-        await navigator.clipboard.writeText(code);
-        
-        // Update button text to show success
-        copyBtn.textContent = 'Copied!';
-        setTimeout(() => {
-            copyBtn.textContent = 'Copy';
-        }, 2000);
-        
-    } catch (err) {
-        console.error('Copy failed:', err);
-        copyBtn.textContent = 'Error';
-        setTimeout(() => {
-            copyBtn.textContent = 'Copy';
-        }, 2000);
-    }
-});
-document.getElementById('fullscreenBtn').addEventListener('click', async () => {
-    if (fullscreenBtn.textContent == "⛶"){fullscreenBtn.textContent = '🗖';}
-    else {fullscreenBtn.textContent = '⛶';}
 
-});
+    // Copy button handler
+    if (copyBtn) {
+        copyBtn.addEventListener('click', async () => {
+            try {
+                const iframeDoc = modalFrame.contentDocument || modalFrame.contentWindow.document;
+                const code = iframeDoc.body.innerHTML;
+                await navigator.clipboard.writeText(code);
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy';
+                }, 2000);
+            } catch (err) {
+                console.error('Copy failed:', err);
+                copyBtn.textContent = 'Error';
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy';
+                }, 2000);
+            }
+        });
+    }
+
+    // Fullscreen button handler
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', function () {
+            if (!document.fullscreenElement) {
+                if (modalContainer.requestFullscreen) {
+                    modalContainer.requestFullscreen();
+                } else if (modalContainer.mozRequestFullScreen) {
+                    modalContainer.mozRequestFullScreen();
+                } else if (modalContainer.webkitRequestFullscreen) {
+                    modalContainer.webkitRequestFullscreen();
+                } else if (modalContainer.msRequestFullscreen) {
+                    modalContainer.msRequestFullscreen();
+                }
+                fullscreenBtn.textContent = '🗖';
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                fullscreenBtn.textContent = '⛶';
+            }
+        });
+    }
+
+    // Close button handler
+    if (closeModal) {
+        closeModal.addEventListener('click', function () {
+            modalOverlay.style.display = 'none';
+            modalFrame.src = '';
+            modalContainer.style.width = '50%';
+            modalContainer.style.height = '50%';
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+        });
+    }
+
+    // Close on overlay click
+    window.addEventListener('mousedown', function (event) {
+        if (event.target === modalOverlay) {
+            modalOverlay.style.display = 'none';
+            modalFrame.src = '';
+            modalContainer.style.width = '50%';
+            modalContainer.style.height = '50%';
+        }
+    });
+
+    // Handle iframe viewport
     modalFrame.addEventListener('load', () => {
         try {
             const iframeDoc = modalFrame.contentDocument || modalFrame.contentWindow.document;
@@ -57,86 +100,18 @@ document.getElementById('fullscreenBtn').addEventListener('click', async () => {
                 iframeDoc.head.appendChild(newViewport);
             }
         } catch (error) {
-            console.error('Ошибка обновления viewport:', error);
+            console.error('Error updating viewport:', error);
         }
     });
 
-
-    // Обработчики для кнопок открытия модалки
-    document.querySelectorAll('.js-modal-trigger').forEach(button => {
-        button.addEventListener('click', () => {
-            const index = button.dataset.index;
-            const iframe = document.getElementById('modalFrame');
-            iframe.src = `/modal?index=${index}`;
-            modalOverlay.style.display = 'block';
-        });
-    });
-
-    closeModal.addEventListener('click', function () {
-        modalOverlay.style.display = 'none';
-        document.getElementById('modalFrame').src = '';
-        modalContainer.style.width = '50%';
-        modalContainer.style.height = '50%';
-        document.exitFullscreen();
-        modalContainer.mozCancelFullScreen();
-        modalContainer.webkitExitFullscreen();
-        modalContainer.msExitFullscreen();
-        })
-        
-    
-
-    window.addEventListener('mousedown', function (event) {
-        if (event.target === modalOverlay) {
-            modalOverlay.style.display = 'none';
-            modalContainer.style.width = '50%';
-            modalContainer.style.height = '50%';
-        }
-    });
-
-    fullscreenBtn.addEventListener('click', function () {
-        const modalContainer = document.querySelector('.modal-container');
-        if (!document.fullscreenElement) {
-            if (modalContainer.requestFullscreen) {
-                modalContainer.requestFullscreen();
-            } else if (modalContainer.mozRequestFullScreen) { // Firefox
-                modalContainer.mozRequestFullScreen();
-            } else if (modalContainer.webkitRequestFullscreen) { // Chrome, Safari and Opera
-                modalContainer.webkitRequestFullscreen();
-            } else if (modalContainer.msRequestFullscreen) { // IE/Edge
-                modalContainer.msRequestFullscreen();
-            }
-            
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.mozCancelFullScreen) { // Firefox
-                document.mozCancelFullScreen();
-            } else if (document.webkitExitFullscreen) { // Chrome, Safari and Opera
-                document.webkitExitFullscreen();
-            } else if (document.msExitFullscreen) { // IE/Edge
-                document.msExitFullscreen();
-            }
-            
-        }
-    });
-});
-document.addEventListener('DOMContentLoaded', function () {
-    const modalOverlay = document.getElementById('modalOverlay');
-    const modalContainer = document.querySelector('.modal-container');
-    const closeModal = document.getElementById('closeModal');
-    const fullscreenBtn = document.getElementById('fullscreenBtn');
-
-    // Track resizing state
+    // Handle resize
     let isResizing = false;
     let currentHandle = null;
-
-    // Store initial pointer points, center, and original width/height
     let startWidth = 0;
     let startHeight = 0;
     let centerX = 0;
     let centerY = 0;
 
-    // Attach event listeners to each resize handle
     document.querySelectorAll('.resize-handle').forEach(handle => {
         handle.addEventListener('mousedown', initResize);
     });
@@ -146,7 +121,6 @@ document.addEventListener('DOMContentLoaded', function () {
         isResizing = true;
         currentHandle = e.target;
 
-        // Get bounding rectangle and find center
         const rect = modalContainer.getBoundingClientRect();
         startWidth = rect.width;
         startHeight = rect.height;
@@ -160,48 +134,26 @@ document.addEventListener('DOMContentLoaded', function () {
     function doResize(e) {
         if (!isResizing) return;
 
-        // Current mouse position
         const mouseX = e.clientX;
         const mouseY = e.clientY;
-
-        // Distance from center
         const dx = mouseX - centerX;
         const dy = mouseY - centerY;
 
-        // We start with the original width/height and adjust if needed
         let newWidth = startWidth;
         let newHeight = startHeight;
 
-        // Identify the handle and adjust newWidth / newHeight
         const handleClasses = currentHandle.classList;
 
-        // Horizontal dimension
-        if (
-            handleClasses.contains('right') ||
-            handleClasses.contains('left') ||
-            handleClasses.contains('corner')
-        ) {
-            // The new half-width is the absolute distance in x from center
+        if (handleClasses.contains('right') || handleClasses.contains('left') || handleClasses.contains('corner')) {
             const halfWidth = Math.abs(dx);
-            newWidth = halfWidth * 2; // total width is double the half-width
+            newWidth = halfWidth * 2;
         }
 
-        // Vertical dimension
-        if (
-            handleClasses.contains('top') ||
-            handleClasses.contains('bottom') ||
-            handleClasses.contains('corner')
-        ) {
-            // The new half-height is the absolute distance in y from center
+        if (handleClasses.contains('top') || handleClasses.contains('bottom') || handleClasses.contains('corner')) {
             const halfHeight = Math.abs(dy);
             newHeight = halfHeight * 2;
         }
 
-        // Constrain within min/max
-        // newWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
-        // newHeight = Math.max(minHeight, Math.min(newHeight, maxHeight));
-
-        // Apply new dimensions (center is maintained by fixed top/left and transform)
         modalContainer.style.width = newWidth + 'px';
         modalContainer.style.height = newHeight + 'px';
     }
@@ -213,8 +165,6 @@ document.addEventListener('DOMContentLoaded', function () {
         document.removeEventListener('mouseup', stopResize);
     }
 });
-
-
 
 document.addEventListener("DOMContentLoaded", () => {
     const header = document.querySelector(".modal-header");

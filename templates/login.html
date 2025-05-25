@@ -1,4 +1,11 @@
-{% extends "base.htm" %}
+{% extends "auth_form.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% set submit_text = 'Login' %}
+{% set link_text = "Don't have an account?" %}
+{% set link_url = url_for('register') %}
+{% set link_label = 'Register here' %}
 
 {% block content %}
 <div class="container mt-5">

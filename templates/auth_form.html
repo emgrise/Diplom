@@ -1,11 +1,6 @@
-{% extends "auth_form.html" %}
+{% extends "base.htm" %}
 
-{% block title %}Register{% endblock %}
-
-{% set submit_text = 'Register' %}
-{% set link_text = 'Already have an account?' %}
-{% set link_url = url_for('login') %}
-{% set link_label = 'Login here' %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -13,15 +8,16 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="text-center">Register</h3>
+                    <h3 class="text-center">{{ title }}</h3>
                 </div>
                 <div class="card-body">
                     {% with messages = get_flashed_messages() %}
                         {% if messages %}
-                            <!-- <div class="alert alert-info">{{ message }}</div> -->
+                            {% for message in messages %}
+                                <div class="alert alert-danger">{{ message }}</div>
+                            {% endfor %}
                         {% endif %}
                     {% endwith %}
-                    
                     <form method="POST">
                         <div class="form-group mb-3">
                             <label for="username">Username</label>
@@ -31,13 +27,13 @@
                             <label for="password">Password</label>
                             <input type="password" class="form-control" id="password" name="password" required minlength="6">
                         </div>
+                        {% block extra_fields %}{% endblock %}
                         <div class="text-center mt-3">
-                            <button type="submit" class="btn btn-primary">Register</button>
+                            <button type="submit" class="btn btn-primary">{{ submit_text }}</button>
                         </div>
                     </form>
-                    
                     <div class="text-center mt-3">
-                        <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+                        <p>{{ link_text }} <a href="{{ link_url }}">{{ link_label }}</a></p>
                     </div>
                 </div>
             </div>

@@ -34,6 +34,7 @@
     background-color: #f8f9fa;
     border-bottom: 1px solid #dee2e6;
     gap: 10px;
+    z-index: 1001;
 }
 
 .modal-header button {
@@ -44,6 +45,11 @@
     border-radius: 4px;
     font-size: 14px;
     transition: all 0.2s ease;
+    min-width: 40px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .copy-btn {
@@ -190,5 +196,7 @@
     .modal-header button {
         padding: 4px 8px;
         font-size: 12px;
+        min-width: 35px;
+        height: 25px;
     }
 }

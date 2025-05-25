@@ -47,30 +47,34 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container">
             <a class="navbar-brand" href="/">Web Effects</a>
+            {% if request.endpoint != 'cabinet','login','register' %}
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'Text' %}active{% endif %}" href="/text" aria-label="Text Effects">Text Effects</a>
+                        <a class="nav-link {% if request.endpoint == 'effects' and effect_type == 'text' %}active{% endif %}" href="/effects/text" aria-label="Text Effects">Text Effects</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'Picture' %}active{% endif %}" href="/picture" aria-label="Picture Effects">Picture Effects</a>
+                        <a class="nav-link {% if request.endpoint == 'effects' and effect_type == 'picture' %}active{% endif %}" href="/effects/picture" aria-label="Picture Effects">Picture Effects</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'Solution' %}active{% endif %}" href="/solution" aria-label="Solution Effects">Solution Effects</a>
+                        <a class="nav-link {% if request.endpoint == 'effects' and effect_type == 'solution' %}active{% endif %}" href="/effects/solution" aria-label="Solution Effects">Solution Effects</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'Animation' %}active{% endif %}" href="/animation" aria-label="Animation Effects">Animation Effects</a>
+                        <a class="nav-link {% if request.endpoint == 'effects' and effect_type == 'animation' %}active{% endif %}" href="/effects/animation" aria-label="Animation Effects">Animation Effects</a>
                     </li>
                 </ul>
+                {% if request.endpoint != 'login','register' %}
+                {% endif %}
                 <div class="d-flex align-items-center">
                     <div class="theme-toggle me-3">
                     <button class="btn btn-outline-light" aria-label="Toggle theme">
                         <i class="fas fa-moon"></i>
                     </button>
                     </div>
+
                     {% if session.get('user_id') %}
                     <div class="dropdown">
                         <button class="btn btn-outline-light account-btn" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
@@ -87,6 +91,7 @@
                         <a href="{{ url_for('login') }}" class="btn btn-outline-light me-2">Login</a>
                         <a href="{{ url_for('register') }}" class="btn btn-primary">Register</a>
                     </div>
+                    {% endif %}
                     {% endif %}
                 </div>
             </div>
@@ -121,7 +126,7 @@
     <div id="modalOverlay" class="modal-overlay">
         <div class="modal-container">
             <div class="modal-header">
-                <button class="copy-btn" id="copyBtn">Copy</button>
+                {% if request.endpoint != 'cabinet' %}<button class="copy-btn" id="copyBtn">Copy</button>{% endif %}
                 <button class="fullscreen-btn" id="fullscreenBtn">⛶</button>
                 <button class="close-btn" id="closeModal">×</button>
             </div>
