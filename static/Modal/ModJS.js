@@ -170,11 +170,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const header = document.querySelector(".modal-header");
     if (header) {
         headerObserver.observe(header);
-        updateButtons(); // Первоначальная настройка
+        updateButtons(); // Initial setup
     }
 });
 
-// Обновляем при изменении окна
+// Update on window resize
 window.addEventListener("resize", updateButtons);
 const resizeObserver = new ResizeObserver(entries => {
     const iframe = document.getElementById('modalFrame');
@@ -185,7 +185,7 @@ const resizeObserver = new ResizeObserver(entries => {
     }, '*');
 });
 
-// Запуск при открытии модалки
+// Start on modal open
 document.querySelectorAll('.js-modal-trigger').forEach(button => {
     button.addEventListener('click', () => {
         setTimeout(() => {

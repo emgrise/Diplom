@@ -47,7 +47,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container">
             <a class="navbar-brand" href="/">Web Effects</a>
-            {% if request.endpoint != 'cabinet','login','register' %}
+            {% if request.endpoint != 'cabinet' and request.endpoint != 'login' and request.endpoint != 'register' %}
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -66,14 +66,9 @@
                         <a class="nav-link {% if request.endpoint == 'effects' and effect_type == 'animation' %}active{% endif %}" href="/effects/animation" aria-label="Animation Effects">Animation Effects</a>
                     </li>
                 </ul>
-                {% if request.endpoint != 'login','register' %}
-                {% endif %}
-                <div class="d-flex align-items-center">
-                    <div class="theme-toggle me-3">
-                    <button class="btn btn-outline-light" aria-label="Toggle theme">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    </div>
+                
+                
+                
 
                     {% if session.get('user_id') %}
                     <div class="dropdown">
@@ -92,14 +87,22 @@
                         <a href="{{ url_for('register') }}" class="btn btn-primary">Register</a>
                     </div>
                     {% endif %}
-                    {% endif %}
+                
+            </div>
+            {% endif %}
+            <div class="d-flex align-items-center">
+                <div class="theme-toggle me-3">
+                <button class="btn btn-outline-light" aria-label="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                </button>
                 </div>
+        
             </div>
         </div>
     </nav>
 
     <!-- Flash Messages -->
-    <div class="container mt-5 pt-5">
+    <!-- <div class="container mt-5 pt-5">
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 {% for message in messages %}
@@ -110,7 +113,7 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
-    </div>
+    </div> -->
 
     <!-- Main Content -->
     <main class="container mt-5 pt-5">

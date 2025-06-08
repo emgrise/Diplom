@@ -13,7 +13,7 @@ app.secret_key = os.urandom(24)
 app.config['DATABASE'] = 'EffectsDB_new.db'
 cache_manager = CacheManager(app=app)
 
-# Константы
+# Constants
 EFFECT_TYPE_MAP = {
     'picture': 'pic',
     'text': 'text',
@@ -21,7 +21,7 @@ EFFECT_TYPE_MAP = {
     'animation': 'animation'
 }
 
-# Вспомогательные функции
+# Helper functions
 def validate_effect_type(effect_type):
     db_effect_type = EFFECT_TYPE_MAP.get(effect_type)
     if not db_effect_type:
@@ -59,6 +59,34 @@ def get_db():
         db.row_factory = sqlite3.Row
     return db
 
+# Function to get effect by index
+def get_effect_by_index(effect_type, index):
+    db_effect_type = validate_effect_type(effect_type)
+    db = get_db()
+    cursor = db.cursor()
+    
+    cursor.execute("SELECT COUNT(*) FROM effects WHERE effect_type = ?", (db_effect_type,))
+    total_effects = cursor.fetchone()[0]
+    
+    if total_effects == 0:
+        raise ValueError(f"No effects found for type: {effect_type}")
+        
+    if index < 0 or index >= total_effects:
+        raise ValueError(f"Invalid effect index. Must be between 0 and {total_effects-1}")
+    
+    cursor.execute("""
+        SELECT id, name, preview_image, code, effect_type, created_at, updated_at, is_public 
+        FROM effects 
+        WHERE effect_type = ? 
+        LIMIT 1 OFFSET ?
+    """, (db_effect_type, index))
+    
+    effect = cursor.fetchone()
+    if not effect:
+        raise ValueError('Effect not found')
+    
+    return dict(effect)
+
 @app.route('/')
 def Index():
     return render_template('Index.html')
@@ -91,73 +119,22 @@ def modal():
     index = int(request.args.get('index', 0))
     effect_type = request.args.get('type', 'pic')
     
-    db_effect_type = validate_effect_type(effect_type)
-    
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("SELECT COUNT(*) FROM effects WHERE effect_type = ?", (db_effect_type,))
-    total_effects = cursor.fetchone()[0]
-    
-    if total_effects == 0:
-        raise ValueError(f"No effects found for type: {effect_type}")
-        
-    if index < 0 or index >= total_effects:
-        raise ValueError(f"Invalid effect index. Must be between 0 and {total_effects-1}")
-    
     cache_file = cache_manager.get_cached_file(index, effect_type)
     if not cache_file:
-        raise ValueError("Effect not found")
-
+        raise ValueError("Failed to generate cache file")
     return send_file(cache_file)
 
 @app.route('/generate_modal/<effect_type>/<int:index>')
 @handle_errors
 def generate_modal(effect_type, index):
-    db_effect_type = validate_effect_type(effect_type)
-    
-    db = get_db()
-    cursor = db.cursor()
-    
-    cursor.execute("SELECT COUNT(*) FROM effects WHERE effect_type = ?", (db_effect_type,))
-    total_effects = cursor.fetchone()[0]
-    
-    if total_effects == 0:
-        raise ValueError(f"No effects found for type: {effect_type}")
-        
-    if index < 0 or index >= total_effects:
-        raise ValueError(f"Invalid effect index. Must be between 0 and {total_effects-1}")
-        
-    cursor.execute("SELECT code FROM effects WHERE effect_type = ? LIMIT 1 OFFSET ?", (db_effect_type, index))
-    result = cursor.fetchone()
-    
-    if not result or not result[0]:
-        raise ValueError("Effect not found")
-        
-    effect_code = result[0]
-    cache_key = f"{effect_type}_{index}"
-    cache_file = os.path.join('static', 'cache', f"{cache_key}.html")
-    
-    os.makedirs(os.path.dirname(cache_file), exist_ok=True)
-    
-    modified_code = f'''
-        <!DOCTYPE html>
-        <html>
-        <head></head>
-        <body>
-        {effect_code} 
-        </body>
-        </html>
-        '''
-    
-    with open(cache_file, 'w', encoding='utf-8') as f:
-        f.write(modified_code)
-    
-    return jsonify({'path': f'/static/cache/{cache_key}.html'})
+    cache_file = cache_manager.get_cached_file(index, effect_type)
+    if not cache_file:
+        raise ValueError("Failed to generate cache file")
+    return jsonify({'path': f'/static/cache/{os.path.basename(cache_file)}'})
 
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     try:
-        # Decode URL-encoded filename
         filename = urllib.parse.unquote(filename)
         return send_from_directory('static', filename)
     except Exception as e:
@@ -165,25 +142,10 @@ def serve_static(filename):
         return render_template('error.html', error="File not found"), 404
 
 @app.route('/effect/<effect_type>/<int:index>')
+@handle_errors
 def render_effect(effect_type, index):
-    try:
-        db = get_db()
-        cursor = db.cursor()
-        
-        # Get the effect code
-        cursor.execute("SELECT code FROM effects WHERE effect_type = ? LIMIT 1 OFFSET ?", (effect_type, index))
-        result = cursor.fetchone()
-        
-        if not result or not result[0]:
-            return "Effect not found", 404
-            
-       
-        
-        return render_template('effect_template.html')
-        
-    except Exception as e:
-        app.logger.error(f"Error rendering effect: {str(e)}")
-        return "Error loading effect", 500
+    effect = get_effect_by_index(effect_type, index)
+    return render_template('effect_template.html', effect=effect)
 
 @app.route('/view_effect/<effect_type>/<int:effect_id>')
 @login_required
@@ -208,50 +170,14 @@ def view_effect(effect_type, effect_id):
     effect_dict['image'] = f'Data_pic/previews/{effect_dict["preview_image"]}'
     effect_dict['url_type'] = effect_type
     
-    if request.headers.get('Accept') == 'application/json':
-        return jsonify(effect_dict)
-    
-    return render_template('view_effect.html',
-                         effect_type=effect_type,
-                         effect_id=effect_id,
-                         effect=effect_dict)
+    return jsonify(effect_dict) if request.headers.get('Accept') == 'application/json' else \
+           render_template('view_effect.html', effect_type=effect_type, effect_id=effect_id, effect=effect_dict)
 
 @app.route('/api/effect/<effect_type>/<int:index>')
 @handle_errors
 def get_effect(effect_type, index):
-    if not effect_type or effect_type.strip() == '':
-        raise ValueError('Effect type is required')
-    
-    db_effect_type = validate_effect_type(effect_type)
-    
-    db = get_db()
-    cursor = db.cursor()
-    
-    cursor.execute("SELECT COUNT(*) FROM effects WHERE effect_type = ?", (db_effect_type,))
-    total_effects = cursor.fetchone()[0]
-    
-    if total_effects == 0:
-        raise ValueError(f'No effects found for type: {effect_type}')
-        
-    if index < 0 or index >= total_effects:
-        raise ValueError(f'Invalid effect index. Must be between 0 and {total_effects-1}')
-    
-    cursor.execute("""
-        SELECT id, name, preview_image, code, effect_type, created_at, updated_at, is_public 
-        FROM effects 
-        WHERE effect_type = ? 
-        LIMIT 1 OFFSET ?
-    """, (db_effect_type, index))
-    
-    effect = cursor.fetchone()
-    if not effect:
-        raise ValueError('Effect not found')
-        
-    effect_dict = dict(effect)
-    effect_dict['image'] = f'Data_pic/previews/{effect_dict["preview_image"]}'
-    effect_dict['url_type'] = effect_type
-    
-    return jsonify(effect_dict)
+    effect = get_effect_by_index(effect_type, index)
+    return jsonify(effect)
 
 @app.route('/preview/<effect_type>/<int:effect_id>')
 @handle_errors
@@ -482,35 +408,55 @@ def cabinet():
 @login_required
 @handle_errors
 def add_effect():
-    effect_name = request.form.get('name')
-    code = request.form.get('code')
-    db_effect_type = request.form.get('effect_type')
-    is_public = bool(request.form.get('is_public'))
+    if 'name' not in request.form or 'code' not in request.form or 'effect_type' not in request.form:
+        raise ValueError('Missing required fields')
+        
+    name = request.form['name']
+    code = request.form['code']
+    effect_type = request.form['effect_type']
+    is_public = request.form.get('is_public', '0') == '1'
     
-    if not all([effect_name, code, db_effect_type]):
-        raise ValueError('Name, code, and effect type are required')
+    db_effect_type = validate_effect_type(effect_type)
     
-    preview_image = request.files.get('preview_image')
-    if not preview_image or not preview_image.filename:
-        raise ValueError('Preview image is required')
-    
-    filename = preview_image.filename
-    previews_dir = os.path.join('static', 'Data_pic', 'previews')
-    os.makedirs(previews_dir, exist_ok=True)
-    
-    preview_path = os.path.join(previews_dir, filename)
+    if 'preview_image' not in request.files:
+        raise ValueError('No preview image provided')
+        
+    preview_image = request.files['preview_image']
+    if preview_image.filename == '':
+        raise ValueError('No selected file')
+        
+    filename = secure_filename(preview_image.filename)
+    preview_path = os.path.join('static', 'Data_pic', 'previews', filename)
+    os.makedirs(os.path.dirname(preview_path), exist_ok=True)
     preview_image.save(preview_path)
     
     db = get_db()
     cursor = db.cursor()
     
     cursor.execute('''
-        INSERT INTO effects (name, preview_image, code, effect_type, user_id, created_at, updated_at, is_public)
-        VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'), ?)
-    ''', (effect_name, filename, code, db_effect_type, session['user_id'], is_public))
+        INSERT INTO effects (name, code, effect_type, preview_image, user_id, is_public)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (name, code, db_effect_type, filename, session['user_id'], is_public))
     
     db.commit()
-    return jsonify({'message': 'Effect added successfully'})
+    
+    # Get the added effect
+    effect_id = cursor.lastrowid
+    cursor.execute('''
+        SELECT id, name, preview_image, code, effect_type, created_at, updated_at, is_public
+        FROM effects
+        WHERE id = ?
+    ''', (effect_id,))
+    
+    effect = cursor.fetchone()
+    effect_dict = dict(effect)
+    effect_dict['image'] = f'Data_pic/previews/{effect_dict["preview_image"]}'
+    effect_dict['url_type'] = db_effect_type
+    
+    return jsonify({
+        'message': 'Effect added successfully',
+        'effect': effect_dict
+    })
 
 @app.route('/edit_effect/<effect_type>/<int:effect_id>', methods=['GET', 'POST'])
 @login_required
@@ -595,25 +541,34 @@ def delete_effect(effect_type, effect_id):
     db = get_db()
     cursor = db.cursor()
     
+    # Get effect information before deletion
     cursor.execute('''
-        SELECT preview_image
+        SELECT id, name, preview_image, code, effect_type, created_at, updated_at, is_public
         FROM effects
         WHERE id = ? AND user_id = ? AND effect_type = ?
     ''', (effect_id, session['user_id'], db_effect_type))
     
     effect = cursor.fetchone()
-    if effect:
-        old_image_path = os.path.join('static', 'Data_pic', 'previews', effect['preview_image'])
-        if os.path.exists(old_image_path):
-            os.remove(old_image_path)
+    if not effect:
+        raise ValueError('Effect not found')
     
+    # Delete the effect
     cursor.execute('''
         DELETE FROM effects
         WHERE id = ? AND user_id = ? AND effect_type = ?
     ''', (effect_id, session['user_id'], db_effect_type))
     
     db.commit()
-    return jsonify({'message': 'Effect deleted successfully'})
+    
+    # Prepare response data
+    effect_dict = dict(effect)
+    effect_dict['image'] = f'Data_pic/previews/{effect_dict["preview_image"]}'
+    effect_dict['url_type'] = db_effect_type
+    
+    return jsonify({
+        'message': 'Effect deleted successfully',
+        'effect': effect_dict
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -18,43 +18,65 @@ class CacheManager:
     def _save_cache_index(self):
         json.dump(self.cache_index, open(self.cache_index_file, 'w'))
 
-    def generate_html(self, index, effect_type, db_path='EffectsDB_new.db'):
+    def get_effect_by_index(self, effect_type, index, db_path='EffectsDB_new.db'):
         try:
             with sqlite3.connect(db_path) as conn:
                 cursor = conn.cursor()
-                cursor.execute("SELECT code FROM effects WHERE effect_type = ? LIMIT 1 OFFSET ?", (effect_type, index))
-                row = cursor.fetchone()
+                cursor.execute("SELECT COUNT(*) FROM effects WHERE effect_type = ?", (effect_type,))
+                total_effects = cursor.fetchone()[0]
                 
-                if not row:
-                    return None
-
+                if total_effects == 0:
+                    raise ValueError(f"No effects found for type: {effect_type}")
+                    
+                if index < 0 or index >= total_effects:
+                    raise ValueError(f"Invalid effect index. Must be between 0 and {total_effects-1}")
                 
+                cursor.execute("""
+                    SELECT id, name, preview_image, code, effect_type, created_at, updated_at, is_public 
+                    FROM effects 
+                    WHERE effect_type = ? 
+                    LIMIT 1 OFFSET ?
+                """, (effect_type, index))
                 
-                original_code = row[0]
-                modified_code = f'''
-                <!DOCTYPE html>
-                <html>
-                <head></head>
-                <body>{original_code}</body>
-                </html>
-                ''' 
+                effect = cursor.fetchone()
+                if not effect:
+                    raise ValueError('Effect not found')
+                
+                return dict(effect)
+        except Exception as e:
+            print(f"Error getting effect: {str(e)}")
+            return None
 
-                with self.app.app_context():
-                    rendered_html = render_template_string(modified_code)
+    def generate_html(self, index, effect_type, db_path='EffectsDB_new.db'):
+        try:
+            effect = self.get_effect_by_index(effect_type, index, db_path)
+            if not effect or not effect['code']:
+                return None
 
-                cache_key = f"effect_{effect_type}_{index}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                cache_file = os.path.join(self.cache_dir, f"{cache_key}.html")
+            modified_code = f'''
+            <!DOCTYPE html>
+            <html>
+            <head></head>
+            <body>{effect['code']}</body>
+            </html>
+            ''' 
 
-                with open(cache_file, 'w', encoding='utf-8') as f:
-                    f.write(rendered_html)
+            with self.app.app_context():
+                rendered_html = render_template_string(modified_code)
 
-                self.cache_index[f"{effect_type}_{index}"] = {
-                    'file': f"{cache_key}.html",
-                    'timestamp': datetime.now().isoformat()
-                }
-                self._save_cache_index()
+            cache_key = f"effect_{effect_type}_{index}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            cache_file = os.path.join(self.cache_dir, f"{cache_key}.html")
 
-                return cache_file
+            with open(cache_file, 'w', encoding='utf-8') as f:
+                f.write(rendered_html)
+
+            self.cache_index[f"{effect_type}_{index}"] = {
+                'file': f"{cache_key}.html",
+                'timestamp': datetime.now().isoformat()
+            }
+            self._save_cache_index()
+
+            return cache_file
 
         except Exception as e:
             print(f"Error generating HTML: {str(e)}")
