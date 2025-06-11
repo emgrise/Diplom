@@ -21,6 +21,7 @@ class CacheManager:
     def get_effect_by_index(self, effect_type, index, db_path='EffectsDB_new.db'):
         try:
             with sqlite3.connect(db_path) as conn:
+                conn.row_factory = sqlite3.Row  # Set row factory to Row
                 cursor = conn.cursor()
                 cursor.execute("SELECT COUNT(*) FROM effects WHERE effect_type = ?", (effect_type,))
                 total_effects = cursor.fetchone()[0]
@@ -42,7 +43,7 @@ class CacheManager:
                 if not effect:
                     raise ValueError('Effect not found')
                 
-                return dict(effect)
+                return dict(zip(effect.keys(), effect))  # Properly convert Row to dict
         except Exception as e:
             print(f"Error getting effect: {str(e)}")
             return None
