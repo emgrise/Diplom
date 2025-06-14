@@ -57,8 +57,17 @@ class CacheManager:
             modified_code = f'''
             <!DOCTYPE html>
             <html>
-            <head></head>
-            <body>{effect['code']}</body>
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    
+                </style>
+            </head>
+            <body>
+                
+                    {effect['code']}
+            
+            </body>
             </html>
             ''' 
 

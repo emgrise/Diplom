@@ -10,7 +10,7 @@ import urllib.parse
 
 app = Flask(__name__, static_url_path='/static')
 app.secret_key = os.urandom(24)
-app.config['DATABASE'] = 'EffectsDB_new.db'
+app.config['DATABASE'] = 'EffectsDB.db'
 cache_manager = CacheManager(app=app)
 
 # Constants
@@ -141,12 +141,6 @@ def serve_static(filename):
         app.logger.error(f"Error serving static file: {str(e)}")
         return render_template('error.html', error="File not found"), 404
 
-@app.route('/effect/<effect_type>/<int:index>')
-@handle_errors
-def render_effect(effect_type, index):
-    effect = get_effect_by_index(effect_type, index)
-    return render_template('effect_template.html', effect=effect)
-
 @app.route('/view_effect/<effect_type>/<int:effect_id>')
 @login_required
 @handle_errors
@@ -188,7 +182,7 @@ def preview_effect(effect_type, effect_id):
     cursor = db.cursor()
     
     cursor.execute("""
-        SELECT name, preview_image, code, effect_type
+        SELECT id, name, preview_image, code, effect_type, created_at, updated_at, is_public
         FROM effects 
         WHERE id = ? AND effect_type = ?
     """, (effect_id, db_effect_type))
@@ -196,20 +190,13 @@ def preview_effect(effect_type, effect_id):
     effect = cursor.fetchone()
     if not effect:
         raise ValueError('Effect not found')
-        
-    preview_html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head></head>
-    <body>
-        <div class="preview-container">
-            {effect['code']}
-        </div>
-    </body>
-    </html>
-    """
     
-    return render_template_string(preview_html)
+    # Use cache_manager to generate the HTML
+    cache_file = cache_manager.generate_html(effect_id, effect_type)
+    if not cache_file:
+        raise ValueError("Failed to generate preview")
+        
+    return send_file(cache_file)
 
 @app.errorhandler(404)
 def not_found_error(error):
@@ -232,46 +219,53 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
-def init_db():
+@app.route('/login', methods=['GET', 'POST'])
+def login():
     try:
-        db = get_db()
-        cursor = db.cursor()
+        if request.method == 'POST':
+            username = request.form.get('username')
+            password = request.form.get('password')
+            
+            if not username or not password:
+                flash('Please provide both username and password')
+                return redirect(url_for('login'))
+            
+            db = get_db()
+            cursor = db.cursor()
+            
+            # Check if users table exists
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
+            if not cursor.fetchone():
+                flash('Database not properly initialized. Please contact administrator.')
+                return redirect(url_for('login'))
+            
+            cursor.execute('SELECT id, password FROM users WHERE username = ?', (username,))
+            user = cursor.fetchone()
+            
+            if user and check_password_hash(user['password'], password):
+                session['user_id'] = user['id']
+                flash('Logged in successfully!')
+                return redirect(url_for('cabinet'))
+            
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
         
-        # Create users table if it doesn't exist
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE NOT NULL,
-                password TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
+        return render_template('auth_form.html',
+            title='Login',
+            submit_text='Login',
+            link_text="Don't have an account?",
+            link_url=url_for('register'),
+            link_label='Register here')
         
-        # Create effects table if it doesn't exist
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS effects (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                preview_image TEXT NOT NULL,
-                code TEXT,
-                effect_type TEXT NOT NULL,
-                user_id INTEGER REFERENCES users(id),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                is_public BOOLEAN DEFAULT 1
-            )
-        ''')
-        
-        db.commit()
-        app.logger.info("Database schema initialized successfully")
-        
-    except sqlite3.Error as e:
-        app.logger.error(f"Error initializing database: {str(e)}")
-        raise
-
-# Initialize the database when the app starts
-with app.app_context():
-    init_db()
+    except Exception as e:
+        app.logger.error(f"Error in login route: {str(e)}")
+        flash('An error occurred during login. Please try again.')
+        return render_template('auth_form.html',
+            title='Login',
+            submit_text='Login',
+            link_text="Don't have an account?",
+            link_url=url_for('register'),
+            link_label='Register here')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -317,7 +311,7 @@ def register():
                 flash('An error occurred during registration. Please try again.')
                 return redirect(url_for('register'))
         
-        return render_template('register.html',
+        return render_template('auth_form.html',
             title='Register',
             submit_text='Register',
             link_text='Already have an account?',
@@ -327,50 +321,12 @@ def register():
     except Exception as e:
         app.logger.error(f"Error in register route: {str(e)}")
         flash('An error occurred during registration. Please try again.')
-        return render_template('register.html')
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    try:
-        if request.method == 'POST':
-            username = request.form.get('username')
-            password = request.form.get('password')
-            
-            if not username or not password:
-                flash('Please provide both username and password')
-                return redirect(url_for('login'))
-            
-            db = get_db()
-            cursor = db.cursor()
-            
-            # Check if users table exists
-            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
-            if not cursor.fetchone():
-                flash('Database not properly initialized. Please contact administrator.')
-                return redirect(url_for('login'))
-            
-            cursor.execute('SELECT id, password FROM users WHERE username = ?', (username,))
-            user = cursor.fetchone()
-            
-            if user and check_password_hash(user['password'], password):
-                session['user_id'] = user['id']
-                flash('Logged in successfully!')
-                return redirect(url_for('cabinet'))
-            
-            flash('Invalid username or password')
-            return redirect(url_for('login'))
-        
-        return render_template('login.html',
-            title='Login',
-            submit_text='Login',
-            link_text="Don't have an account?",
-            link_url=url_for('register'),
-            link_label='Register here')
-        
-    except Exception as e:
-        app.logger.error(f"Error in login route: {str(e)}")
-        flash('An error occurred during login. Please try again.')
-        return render_template('login.html')
+        return render_template('auth_form.html',
+            title='Register',
+            submit_text='Register',
+            link_text='Already have an account?',
+            link_url=url_for('login'),
+            link_label='Login here')
 
 @app.route('/logout')
 def logout():
