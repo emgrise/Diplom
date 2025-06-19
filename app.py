@@ -141,31 +141,7 @@ def serve_static(filename):
         app.logger.error(f"Error serving static file: {str(e)}")
         return render_template('error.html', error="File not found"), 404
 
-@app.route('/view_effect/<effect_type>/<int:effect_id>')
-@login_required
-@handle_errors
-def view_effect(effect_type, effect_id):
-    db_effect_type = validate_effect_type(effect_type)
-    
-    db = get_db()
-    cursor = db.cursor()
-    
-    cursor.execute('''
-        SELECT id, name, preview_image, code, effect_type, created_at, updated_at, is_public
-        FROM effects
-        WHERE id = ? AND user_id = ? AND effect_type = ?
-    ''', (effect_id, session['user_id'], db_effect_type))
-    
-    effect = cursor.fetchone()
-    if not effect:
-        raise ValueError('Effect not found')
-    
-    effect_dict = dict(effect)
-    effect_dict['image'] = f'Data_pic/previews/{effect_dict["preview_image"]}'
-    effect_dict['url_type'] = effect_type
-    
-    return jsonify(effect_dict) if request.headers.get('Accept') == 'application/json' else \
-           render_template('view_effect.html', effect_type=effect_type, effect_id=effect_id, effect=effect_dict)
+
 
 @app.route('/api/effect/<effect_type>/<int:index>')
 @handle_errors
@@ -177,26 +153,35 @@ def get_effect(effect_type, index):
 @handle_errors
 def preview_effect(effect_type, effect_id):
     db_effect_type = validate_effect_type(effect_type)
-    
     db = get_db()
     cursor = db.cursor()
-    
     cursor.execute("""
         SELECT id, name, preview_image, code, effect_type, created_at, updated_at, is_public
         FROM effects 
         WHERE id = ? AND effect_type = ?
     """, (effect_id, db_effect_type))
-    
     effect = cursor.fetchone()
     if not effect:
         raise ValueError('Effect not found')
-    
-    # Use cache_manager to generate the HTML
-    cache_file = cache_manager.generate_html(effect_id, effect_type)
-    if not cache_file:
-        raise ValueError("Failed to generate preview")
-        
-    return send_file(cache_file)
+    # Генерируем HTML-файл через cache_manager (можно по id или по коду)
+    # Здесь для простоты используем code напрямую:
+    modified_code = f'''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <style></style>
+    </head>
+    <body>
+        {effect['code']}
+    </body>
+    </html>
+    '''
+    from flask import render_template_string, make_response
+    rendered_html = render_template_string(modified_code)
+    response = make_response(rendered_html)
+    response.headers['Content-Type'] = 'text/html'
+    return response
 
 @app.errorhandler(404)
 def not_found_error(error):
@@ -345,17 +330,18 @@ def cabinet():
         SELECT id, name, preview_image, code, effect_type, created_at, updated_at, is_public 
         FROM effects 
         WHERE user_id = ? 
-        ORDER BY created_at DESC
+        ORDER BY id ASC
     ''', (session['user_id'],))
     effects = cursor.fetchall()
     
     formatted_effects = []
-    for effect in effects:
+    for idx, effect in enumerate(effects):
         effect_dict = dict(effect)
         effect_dict['image'] = f'Data_pic/previews/{effect_dict["preview_image"]}'
         effect_dict['url_type'] = next((k for k, v in EFFECT_TYPE_MAP.items() if v == effect_dict['effect_type']), effect_dict['effect_type'])
         effect_dict['has_preview'] = bool(effect_dict['preview_image'])
         effect_dict['has_code'] = bool(effect_dict['code'])
+        effect_dict['index'] = idx
         formatted_effects.append(effect_dict)
     
     return render_template('cabinet.html', effects=formatted_effects)
@@ -492,35 +478,43 @@ def edit_effect(effect_type, effect_id):
 @login_required
 @handle_errors
 def delete_effect(effect_type, effect_id):
-    db_effect_type = validate_effect_type(effect_type)
     
+    db_effect_type = validate_effect_type(effect_type)
     db = get_db()
     cursor = db.cursor()
-    
     # Get effect information before deletion
     cursor.execute('''
         SELECT id, name, preview_image, code, effect_type, created_at, updated_at, is_public
         FROM effects
         WHERE id = ? AND user_id = ? AND effect_type = ?
     ''', (effect_id, session['user_id'], db_effect_type))
-    
     effect = cursor.fetchone()
     if not effect:
         raise ValueError('Effect not found')
-    
+    # Удаляем файл превью, если он есть
+    if effect['preview_image']:
+        preview_path = os.path.join('static', 'Data_pic', 'previews', effect['preview_image'])
+        if os.path.exists(preview_path):
+            os.remove(preview_path)
+    # Удаляем кэшированные HTML-файлы для этого эффекта
+    cache_dir = os.path.join('static', 'cache')
+    if os.path.exists(cache_dir):
+        for file in os.listdir(cache_dir):
+            if file.startswith(f"effect_{db_effect_type}_") and (str(effect_id) in file or effect['preview_image'] in file):
+                try:
+                    os.remove(os.path.join(cache_dir, file))
+                except Exception:
+                    pass
     # Delete the effect
     cursor.execute('''
         DELETE FROM effects
         WHERE id = ? AND user_id = ? AND effect_type = ?
     ''', (effect_id, session['user_id'], db_effect_type))
-    
     db.commit()
-    
     # Prepare response data
     effect_dict = dict(effect)
     effect_dict['image'] = f'Data_pic/previews/{effect_dict["preview_image"]}'
     effect_dict['url_type'] = db_effect_type
-    
     return jsonify({
         'message': 'Effect deleted successfully',
         'effect': effect_dict

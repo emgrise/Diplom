@@ -36,6 +36,7 @@ class CacheManager:
                     SELECT id, name, preview_image, code, effect_type, created_at, updated_at, is_public 
                     FROM effects 
                     WHERE effect_type = ? 
+                    ORDER BY id ASC
                     LIMIT 1 OFFSET ?
                 """, (effect_type, index))
                 
