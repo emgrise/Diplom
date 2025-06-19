@@ -18,12 +18,11 @@ class="has-sidebar"
     <!-- Карточки эффектов -->
     <div class="row g-3" id="effectsContainer">
         {% for effect in effects %}
-        <div class="col-md-6 col-lg-4 effect-item" data-type="{{ effect.url_type }}" data-id="{{ effect.id }}">
+        <div class="col-md-6 col-lg-4 effect-item" data-type="{{ effect.url_type }}" data-id="{{ effect.id }}" data-index="{{ loop.index0 }}">
             <div class="effect-card card h-100">
                 <img src="{{ url_for('static', filename=effect.image) }}" 
                      class="card-img-top" 
-                     alt="{{ effect.name }}"
-                     onclick="viewEffect('{{ effect.id }}', '{{ effect.url_type }}')">
+                     alt="{{ effect.name }}">
                 <div class="card-body">
                     <h5 class="card-title">{{ effect.name }}</h5>
                     <p class="card-text">
@@ -33,7 +32,7 @@ class="has-sidebar"
                         {% endif %}
                     </p>
                     <div class="btn-group">
-                        <button class="btn btn-primary view-effect-btn" onclick="viewEffect('{{ effect.id }}', '{{ effect.url_type }}')">
+                        <button class="btn btn-primary view-effect-btn" data-type="{{ effect.url_type }}" data-index="{{ loop.index0 }}">
                             <i class="fas fa-eye me-2"></i>View Effect
                         </button>
                         <button class="btn btn-warning" onclick="editEffect('{{ effect.url_type }}', '{{ effect.id }}')">
@@ -358,6 +357,23 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.remove('modal-open');
             document.body.style.overflow = '';
             document.body.style.paddingRight = '';
+        });
+    });
+
+    document.querySelectorAll('.view-effect-btn').forEach(button => {
+        button.addEventListener('click', async function() {
+            try {
+                const type = this.dataset.type;
+                const index = this.dataset.index;
+                const response = await fetch(`/generate_modal/${type}/${index}`);
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Failed to load effect');
+                if (!data.path) throw new Error('No path returned for effect');
+                window.openModal(data.path);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading effect: ' + error.message);
+            }
         });
     });
 });

@@ -414,33 +414,6 @@ header h1 {
     transform: rotate(180deg);
 }
 
-.search-container {
-    max-width: 600px;
-    margin: 0 auto 2rem;
-}
-
-.search-container .form-control {
-    border-radius: 2rem 0 0 2rem;
-    padding: 0.75rem 1.5rem;
-    border: 2px solid var(--border-color);
-    background-color: var(--card-bg);
-    color: var(--text-color);
-}
-
-.search-container .form-control:focus {
-    box-shadow: 0 0 0 0.25rem rgba(var(--primary-color), 0.25);
-    border-color: var(--primary-color);
-}
-
-.search-container .btn {
-    border-radius: 0 2rem 2rem 0;
-    padding: 0.75rem 1.5rem;
-    transition: all 0.3s ease;
-}
-
-.search-container .btn:hover {
-    transform: scale(1.05);
-}
 
 .effect-card {
     background-color: var(--card-bg);
@@ -660,25 +633,7 @@ header h1 {
     }
 }
 
-/* Error page styles */
-/*
-.error-container {
-    text-align: center;
-    padding: 3rem 1rem;
-}
 
-.error-container i {
-    color: var(--primary-color);
-}
-
-.error-message {
-    color: var(--text-color);
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-}
-*/
-
-/* Theme transition */
 body,
 header,
 .footer,
@@ -733,7 +688,6 @@ header,
     color: var(--text-color);
 }
 
-/* Theme transition animation */
 .theme-transitioning * {
     transition: background-color 0.3s ease,
                 color 0.3s ease,
@@ -745,7 +699,6 @@ header,
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* Page loader */
 .page-loader {
     position: fixed;
     top: 0;
@@ -781,7 +734,6 @@ header,
     }
 }
 
-/* AOS animations */
 [data-aos] {
     opacity: 0;
     transition-property: transform, opacity;
@@ -799,7 +751,7 @@ header,
     transform: translateY(0);
 }
 
-/* Enhanced card animations */
+
 .effect-card {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -817,7 +769,7 @@ header,
     transform: translateX(5px);
 }
 
-/* Enhanced button styles */
+
 .btn {
     position: relative;
     overflow: hidden;
@@ -842,48 +794,17 @@ header,
     height: 300px;
 }
 
-/* Enhanced navigation */
-/* Duplicate .nav-link styles were removed above */
-
-/* Enhanced search */
-/* Duplicate .search-container .form-control:focus and .search-container .btn styles were removed above */
-
-/* Enhanced social links */
-/* Duplicate .social-links a styles were removed above */
-
-/* Dark theme enhancements */
-/* Duplicate .dark-theme .effect-card::before, .dark-theme .effect-card:hover::before, .dark-theme .btn-primary, .dark-theme .btn-primary:hover, .dark-theme .modal-content, .dark-theme .form-control, .dark-theme .form-control:focus and .dark-theme .nav-link styles were removed above */
-
-/* Responsive enhancements */
-@media (max-width: 768px) {
-    /* Duplicate responsive styles were removed above */
-}
-
-/* Dark theme specific styles */
-/* Duplicate .dark-theme .navbar, .dark-theme .navbar-brand, .dark-theme .nav-link, .dark-theme .nav-link:hover, .dark-theme .nav-link.active, .dark-theme .effect-card, .dark-theme .effect-card:hover, .dark-theme .card-title, .dark-theme .card-text, .dark-theme .btn-primary, .dark-theme .btn-primary:hover, .dark-theme .search-container .form-control, .dark-theme .search-container .form-control:focus, .dark-theme .footer, .dark-theme .footer h5, .dark-theme .footer p, .dark-theme .social-links a, .dark-theme .social-links a:hover, .dark-theme .theme-toggle button, .dark-theme .theme-toggle button:hover and .dark-theme .no-results-message, .dark-theme .modal-content, .dark-theme .modal-header, .dark-theme .modal-footer, .dark-theme .modal-title, .dark-theme .close, .dark-theme .close:hover styles were removed above */
-
-/* Theme transition */
-/* Duplicate .theme-transitioning * and .theme-transitioning .theme-toggle button i styles were removed above */
-
-/* Loading state for dark theme */
-/* Duplicate .dark-theme .page-loader and .dark-theme .loader-content i styles were removed above */
-
-/* No results message for dark theme */
-/* Duplicate .dark-theme .no-results-message styles were removed above */
-
-/* Modal styles for dark theme */
-/* Duplicate .dark-theme .modal-content, .dark-theme .modal-header, .dark-theme .modal-footer, .dark-theme .modal-title, .dark-theme .close, .dark-theme .close:hover styles were removed above */
 
 .sidebar {
     position: fixed;
     left: 0;
-    top: 0; /* Ensure it starts from the top */
+    top: 0; 
     bottom: 0;
     width: 250px;
     background-color: var(--card-bg);
     padding: 2rem 1rem;
     
-    z-index: 11 !important; /* Ensure it's above the default navbar z-index */
+    z-index: 11 !important; 
     overflow-y: auto;
 }
 
@@ -914,7 +835,7 @@ header,
         border-right: none;
         border-bottom: 1px solid var(--border-color);
         padding: 1rem;
-        z-index: auto; /* Reset z-index on smaller screens */
+        z-index: auto; 
     }
     
     .main-content {
@@ -928,9 +849,8 @@ header,
     }
 }
 
-/* Adjust effect card columns for wider cards */
 .main-content .row > div {
-    /* Override default Bootstrap col padding */
+
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
 }
@@ -940,22 +860,20 @@ header,
     margin-right: -0.5rem !important;
 }
 
-/* Styles for header when a fixed sidebar is present */
 body.has-sidebar header {
-    margin-left: 0; /* Remove margin-left */
-    width: 100%; /* Restore full width */
+    margin-left: 0; 
+    width: 100%; 
 }
 
-/* Reset header styles on small screens */
 @media (max-width: 768px) {
-    /* ... existing code ... */
+    
     body.has-sidebar header {
         margin-left: 0;
         width: 100%;
     }
 }
 
-/* Styles specific to cabinet.html */
+
 .effect-card {
     margin-bottom: 20px;
 }
@@ -1001,17 +919,14 @@ body.has-sidebar header {
 }
 
 .main-content {
-     /* Keep margin-left to be next to sidebar */
-    padding: 90px 2rem 2rem 2rem; /* Keep top padding to clear navbar */
+   
+    padding: 90px 2rem 2rem 2rem; 
 }
 
 
-
-/* Ensure fixed navbar does not cover sidebar content */
 .navbar.fixed-top {
-     /* Shift navbar to the right of the sidebar */
-    width: 100% ; /* Adjust width to fit next to sidebar */
-    /* Default Bootstrap z-index for fixed-top */
+
+    width: 100% ; 
 }
 .fixed-top{
     z-index: 3 !important;

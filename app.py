@@ -15,7 +15,7 @@ cache_manager = CacheManager(app=app)
 
 # Constants
 EFFECT_TYPE_MAP = {
-    'picture': 'pic',
+    'picture': 'picture',
     'text': 'text',
     'solution': 'solution',
     'animation': 'animation'

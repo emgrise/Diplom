@@ -18,7 +18,7 @@ class CacheManager:
     def _save_cache_index(self):
         json.dump(self.cache_index, open(self.cache_index_file, 'w'))
 
-    def get_effect_by_index(self, effect_type, index, db_path='EffectsDB_new.db'):
+    def get_effect_by_index(self, effect_type, index, db_path='EffectsDB.db'):
         try:
             with sqlite3.connect(db_path) as conn:
                 conn.row_factory = sqlite3.Row  # Set row factory to Row
@@ -48,7 +48,7 @@ class CacheManager:
             print(f"Error getting effect: {str(e)}")
             return None
 
-    def generate_html(self, index, effect_type, db_path='EffectsDB_new.db'):
+    def generate_html(self, index, effect_type, db_path='EffectsDB.db'):
         try:
             effect = self.get_effect_by_index(effect_type, index, db_path)
             if not effect or not effect['code']:

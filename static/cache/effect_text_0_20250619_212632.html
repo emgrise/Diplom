@@ -1,0 +1,47 @@
+
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    
+                </style>
+            </head>
+            <body>
+                
+                    <style>
+@keyframes wave {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+body {
+  background: linear-gradient(to right, #e0f7fa, #e1bee7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.text {
+  animation: wave 1s infinite ease-in-out;
+  font-size: 48px;
+  font-weight: bold;
+  color: #6a1b9a;
+  padding: 20px 40px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+</style>
+
+<div class="text">Wave</div>
+
+            
+            </body>
+            </html>
+            
