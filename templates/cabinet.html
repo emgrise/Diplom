@@ -499,4 +499,8 @@ function submitEditForm() {
     });
 }
 </script>
+{% endblock %}
+
+{% block additional_css %}
+<link href="{{ url_for('static', filename='styles/cabinet.css') }}" rel="stylesheet">
 {% endblock %} 

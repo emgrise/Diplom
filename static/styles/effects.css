@@ -1,0 +1,53 @@
+/* Effects page specific styles */
+.effect-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.effect-card .card-body {
+    padding: 2rem 1rem 1rem 1rem;
+    text-align: center;
+}
+
+.effect-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text-color);
+}
+
+.effect-card .card-text {
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+}
+
+.effect-card .btn {
+    padding: 0.5rem 1.25rem;
+    border-radius: 2rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.card-img-top {
+    height: 180px;
+    object-fit: cover;
+}
+
+.row.g-4 {
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .effect-card .card-body {
+        padding: 1rem;
+    }
+    .card-img-top {
+        height: 120px;
+    }
+} 

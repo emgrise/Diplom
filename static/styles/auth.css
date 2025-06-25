@@ -1,0 +1,55 @@
+/* Auth form specific styles */
+.container.mt-5 {
+    margin-top: 5rem !important;
+}
+
+.card {
+    border-radius: 1rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    border: 1px solid var(--border-color);
+}
+
+.card-header {
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-body {
+    background: var(--card-bg);
+}
+
+.form-group label {
+    color: var(--text-color);
+}
+
+.form-control {
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    background: var(--background-color);
+    color: var(--text-color);
+    transition: border-color 0.3s;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.btn {
+    border-radius: 2rem;
+    font-weight: 500;
+}
+
+.alert {
+    border-radius: 0.5rem;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+@media (max-width: 768px) {
+    .container.mt-5 {
+        margin-top: 2rem !important;
+    }
+} 

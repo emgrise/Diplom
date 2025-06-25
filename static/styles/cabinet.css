@@ -1,0 +1,53 @@
+/* Cabinet page specific styles */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0; 
+    bottom: 0;
+    width: 250px;
+    background-color: var(--card-bg);
+    padding: 2rem 1rem;
+    z-index: 11 !important; 
+    overflow-y: auto;
+}
+
+.sidebar h2 {
+    margin-bottom: 2rem;
+    color: var(--text-color);
+}
+
+.filter-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.filter-buttons .btn {
+    text-align: left;
+    margin-right: 0;
+}
+
+.main-content {
+    padding: 90px 2rem 2rem 2rem; 
+}
+
+.effect-item {
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        position: relative;
+        top: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem;
+        z-index: auto;
+    }
+    .main-content {
+        margin-left: 0;
+        padding: 2rem 1rem;
+    }
+} 

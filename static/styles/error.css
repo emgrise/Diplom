@@ -1,0 +1,31 @@
+/* Error page specific styles */
+.error-container {
+    background: var(--card-bg);
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 2rem 1.5rem;
+    margin-top: 2rem;
+}
+
+.error-message {
+    color: var(--accent-color);
+    font-size: 1.1rem;
+}
+
+.btn {
+    border-radius: 2rem;
+    font-weight: 500;
+}
+
+.footer {
+    background: var(--footer-bg);
+    border-top: 1px solid var(--border-color);
+    padding: 2rem 0;
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .error-container {
+        padding: 1rem 0.5rem;
+    }
+} 
