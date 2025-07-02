@@ -1,0 +1,17 @@
+# @.gitignore
+# Created by venv; see https://docs.python.org/3/library/venv.html
+# Игнорировать базу данных
+*.sqlite3
+*.db
+
+# Игнорировать кэш
+__pycache__/
+*.pyc
+*.log
+.cache/
+.tmp/
+
+static/
+.Data_pic/
+.cache/
+
