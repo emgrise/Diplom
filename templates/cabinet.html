@@ -6,6 +6,101 @@ class="has-sidebar"
 
 {% block content %}
 
+{% macro modal_effect_modal(modal_id, modal_title, form_id, form_method, form_action, form_onsubmit, show_type_select, effect_type, effect_id, effect_name, effect_code, image_required, image_hint, show_public_checkbox, is_public, code_rows, buttons) %}
+<div class="modal fade" id="{{ modal_id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ modal_title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="{{ form_id }}" method="{{ form_method|default('POST') }}" action="{{ form_action|default('') }}" enctype="multipart/form-data" {% if form_onsubmit %}onsubmit="{{ form_onsubmit }}"{% endif %}>
+                    {% if show_type_select %}
+                    <div class="mb-3">
+                        <label class="form-label">Effect Type</label>
+                        <select class="form-select" name="effect_type" required>
+                            <option value="">Select type...</option>
+                            <option value="text" {% if effect_type=='text' %}selected{% endif %}>Text Effect</option>
+                            <option value="picture" {% if effect_type=='picture' %}selected{% endif %}>Picture Effect</option>
+                            <option value="solution" {% if effect_type=='solution' %}selected{% endif %}>Solution Effect</option>
+                            <option value="animation" {% if effect_type=='animation' %}selected{% endif %}>Animation Effect</option>
+                        </select>
+                    </div>
+                    {% endif %}
+                    <input type="hidden" name="effect_id" value="{{ effect_id|default('') }}">
+                    <div class="mb-3">
+                        <label for="effectNameInput_{{ modal_id }}" class="form-label">Effect Name</label>
+                        <input type="text" class="form-control" id="effectNameInput_{{ modal_id }}" name="name" value="{{ effect_name|default('') }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="effectImageInput_{{ modal_id }}" class="form-label">Preview Image</label>
+                        <input type="file" class="form-control" id="effectImageInput_{{ modal_id }}" name="preview_image" accept="image/*" {% if image_required %}required{% endif %}>
+                        <div class="form-text">{{ image_hint|default('Upload an image that previews your effect.') }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="effectCodeInput_{{ modal_id }}" class="form-label">Effect Code</label>
+                        <textarea class="form-control" id="effectCodeInput_{{ modal_id }}" name="code" rows="{{ code_rows|default(10) }}" required>{{ effect_code|default('') }}</textarea>
+                        <div class="form-text">Enter the HTML/CSS/JavaScript code for your effect.</div>
+                    </div>
+                   
+                    <div class="d-grid gap-2 text-end">
+                        {% for button in buttons %}
+                            <button type="{{ button.type }}" class="btn {{ button.class }}" {% if button.dismiss %}data-bs-dismiss="modal"{% endif %} {% if button.onclick %}onclick="{{ button.onclick }}"{% endif %}>{{ button.label }}</button>
+                        {% endfor %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+{% from "_formhelpers.html" import render_field %}
+
+{% macro effect_card(item, effect_type=None, loop=None, context=None) %}
+<div class="effect-card card h-100">
+    <img src="{{ url_for('static', filename=item.image) }}" class="card-img-top" alt="{{ item.description or item.name }}">
+    <div class="card-body text-center">
+        <h5 class="card-title">{{ item.description or item.name }}</h5>
+        {% if context == 'cabinet' %}
+            <p class="card-text">
+                <span class="badge bg-primary">{{ item.url_type|capitalize }}</span>
+            </p>
+            <div class="btn-group">
+                <button class="btn btn-primary view-effect-btn" data-type="{{ item.url_type }}" data-id="{{ item.id }}">
+                    <i class="fas fa-eye me-2"></i>View Effect
+                </button>
+                <button class="btn btn-warning" onclick="editEffect('{{ item.url_type }}', '{{ item.id }}')">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button type="button"
+                   class="btn btn-danger delete-effect-btn" 
+                   data-effect-id="{{ item.id }}" 
+                   data-effect-type="{{ item.url_type }}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div class="form-check mt-2">
+                <input class="form-check-input publish-checkbox" type="checkbox"
+                       id="publishCheck_{{ item.id }}"
+                       data-effect-id="{{ item.id }}"
+                       data-effect-type="{{ item.url_type }}"
+                       {% if item.is_public %}checked{% endif %}>
+                <label class="form-check-label" for="publishCheck_{{ item.id }}">
+                    Публично
+                </label>
+            </div>
+        {% else %}
+            <button class="btn btn-primary view-effect-btn" 
+                    data-type="{{ effect_type }}" 
+                    data-index="{{ loop.index0 if loop is defined else 0 }}">
+                <i class="fas fa-eye me-2"></i>View Effect
+            </button>
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}
 
 <!-- Main Content -->
 <main class="main-content">
@@ -19,34 +114,7 @@ class="has-sidebar"
     <div class="row g-3" id="effectsContainer">
         {% for effect in effects %}
         <div class="col-md-6 col-lg-4 effect-item" data-type="{{ effect.url_type }}" data-id="{{ effect.id }}" data-index="{{ loop.index0 }}">
-            <div class="effect-card card h-100">
-                <img src="{{ url_for('static', filename=effect.image) }}" 
-                     class="card-img-top" 
-                     alt="{{ effect.name }}">
-                <div class="card-body">
-                    <h5 class="card-title">{{ effect.name }}</h5>
-                    <p class="card-text">
-                        <span class="badge bg-primary">{{ effect.url_type|capitalize }}</span>
-                        {% if effect.pointer %}
-                            <span class="badge bg-info">{{ effect.pointer }}</span>
-                        {% endif %}
-                    </p>
-                    <div class="btn-group">
-                        <button class="btn btn-primary view-effect-btn" data-type="{{ effect.url_type }}" data-id="{{ effect.id }}">
-                            <i class="fas fa-eye me-2"></i>View Effect
-                        </button>
-                        <button class="btn btn-warning" onclick="editEffect('{{ effect.url_type }}', '{{ effect.id }}')">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <a href="{{ url_for('delete_effect', effect_type=effect.url_type, effect_id=effect.id) }}" 
-                           class="btn btn-danger delete-effect-btn" 
-                           data-effect-id="{{ effect.id }}" 
-                           data-effect-type="{{ effect.url_type }}">
-                            <i class="fas fa-trash"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
+            {{ effect_card(effect, None, loop, 'cabinet') }}
         </div>
         {% else %}
         <div class="col-12 text-center">
@@ -56,7 +124,7 @@ class="has-sidebar"
     </div>
 </main>
 
-<!-- Модальное окно добавления эффекта -->
+<!-- Модальное окно добавления эффекта через WTForms -->
 <div class="modal fade" id="addEffectModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -65,42 +133,18 @@ class="has-sidebar"
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="addEffectForm" method="POST" action="" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label class="form-label">Effect Type</label>
-                        <select class="form-select" name="effect_type" required>
-                            <option value="">Select type...</option>
-                            <option value="text">Text Effect</option>
-                            <option value="picture">Picture Effect</option>
-                            <option value="solution">Solution Effect</option>
-                            <option value="animation">Animation Effect</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Effect Name</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="preview_image" class="form-label">Preview Image</label>
-                        <input type="file" class="form-control" id="preview_image" name="preview_image" accept="image/*" required>
-                        <div class="form-text">Upload an image that previews your effect.</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="code" class="form-label">Effect Code</label>
-                        <textarea class="form-control" id="code" name="code" rows="10" required></textarea>
-                        <div class="form-text">Enter the HTML/CSS/JavaScript code for your effect.</div>
-                    </div>
-
+                <form id="addEffectForm" method="POST" action="{{ url_for('add_effect') }}" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    {{ render_field(form.effect_type, class_="form-select mb-3") }}
+                    {{ render_field(form.name, class_="form-control mb-3") }}
+                    {{ render_field(form.preview_image, class_="form-control mb-3") }}
+                    {{ render_field(form.code, class_="form-control mb-3") }}
                     <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="is_public" name="is_public" value="1" checked>
-                        <label class="form-check-label" for="is_public">Make this effect public</label>
+                        {{ form.is_public(class_="form-check-input") }}
+                        {{ form.is_public.label(class_="form-check-label") }}
                     </div>
-
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Create Effect</button>
+                        {{ form.submit(class_="btn btn-primary") }}
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </form>
@@ -109,44 +153,43 @@ class="has-sidebar"
     </div>
 </div>
 
-<!-- Модальное окно редактирования эффекта -->
-<div class="modal fade" id="editEffectModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Edit Effect</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editEffectForm" onsubmit="return false;">
-                    <input type="hidden" id="effectType" name="effect_type">
-                    <input type="hidden" id="effectId" name="effect_id">
-                    
-                    <div class="mb-3">
-                        <label for="effectName" class="form-label">Effect Name</label>
-                        <input type="text" class="form-control" id="effectName" name="effect_name" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="effectCode" class="form-label">Effect Code</label>
-                        <textarea class="form-control" id="effectCode" name="code" rows="5"></textarea>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="effectImage" class="form-label">Preview Image</label>
-                        <input type="file" class="form-control" id="effectImage" name="preview_image" accept="image/*">
-                        <div class="form-text">Leave empty to keep current image</div>
-                    </div>
-                    
-                    <div class="text-end">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" onclick="submitEditForm()">Save Changes</button>
-                    </div>
-                </form>
-            </div>
+<!-- Универсальное модальное окно для добавления/редактирования эффекта -->
+<div class="modal fade" id="effectModal" tabindex="-1" aria-labelledby="effectModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="effectForm" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title" id="effectModalLabel">Эффект</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
         </div>
+        <div class="modal-body">
+          <input type="hidden" id="effectType" name="effect_type">
+          <input type="hidden" id="effectId" name="effect_id">
+          <div class="mb-3">
+            <label for="effectName" class="form-label">Название эффекта</label>
+            <input type="text" class="form-control" id="effectName" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="effectImage" class="form-label">Превью (картинка)</label>
+            <input type="file" class="form-control" id="effectImage" name="preview_image" accept="image/*">
+            <div class="form-text">Загрузите изображение-превью эффекта.</div>
+          </div>
+          <div class="mb-3">
+            <label for="effectCode" class="form-label">Код эффекта</label>
+            <textarea class="form-control" id="effectCode" name="code" rows="10" required></textarea>
+            <div class="form-text">Введите HTML/CSS/JavaScript код эффекта.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
+<!-- Конец модального окна -->
+
 {% endblock %}
 
 {% block additional_js %}
@@ -187,90 +230,62 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.message) {
-                    // Создаем новую карточку эффекта
+                    // Создаем новую карточку эффекта через серверный шаблон
                     const effect = data.effect;
                     const newCard = document.createElement('div');
                     newCard.className = 'col-md-6 col-lg-4 effect-item';
                     newCard.dataset.type = effect.url_type;
                     newCard.dataset.id = effect.id;
-                    
-                    newCard.innerHTML = `
-                        <div class="effect-card card h-100">
-                            <img src="/static/${effect.image}" 
-                                 class="card-img-top" 
-                                 alt="${effect.name}"
-                                 onclick="viewEffect('${effect.id}', '${effect.url_type}')">
-                            <div class="card-body">
-                                <h5 class="card-title">${effect.name}</h5>
-                                <p class="card-text">
-                                    <span class="badge bg-primary">${effect.url_type.charAt(0).toUpperCase() + effect.url_type.slice(1)}</span>
-                                </p>
-                                <div class="btn-group">
-                                    <button class="btn btn-primary view-effect-btn" onclick="viewEffect('${effect.id}', '${effect.url_type}')">
-                                        <i class="fas fa-eye me-2"></i>View Effect
-                                    </button>
-                                    <button class="btn btn-warning" onclick="editEffect('${effect.url_type}', '${effect.id}')">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <a href="/delete_effect/${effect.url_type}/${effect.id}" 
-                                       class="btn btn-danger delete-effect-btn" 
-                                       data-effect-id="${effect.id}" 
-                                       data-effect-type="${effect.url_type}">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    
-                    // Добавляем новую карточку в контейнер
-                    const container = document.getElementById('effectsContainer');
-                    container.insertBefore(newCard, container.firstChild);
-                    
-                    // Добавляем обработчик для кнопки удаления
-                    const deleteBtn = newCard.querySelector('.delete-effect-btn');
-                    deleteBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const effectId = this.dataset.effectId;
-                        const effectType = this.dataset.effectType;
-                        
-                        fetch(`/delete_effect/${effectType}/${effectId}`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.message) {
-                                newCard.remove();
-                                // Показываем уведомление об успехе
-                                const alertDiv = document.createElement('div');
-                                alertDiv.className = 'alert alert-success alert-dismissible fade show';
-                                alertDiv.innerHTML = `
-                                    Effect deleted successfully!
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                `;
-                                document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.row'));
-                                
-                                // Удаляем уведомление через 3 секунды
-                                setTimeout(() => {
-                                    alertDiv.remove();
-                                }, 3000);
-                            }
-                        });
+                    fetch('/render_effect_card', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ effect: effect })
+                    })
+                    .then(response => response.text())
+                    .then(cardHtml => {
+                        newCard.innerHTML = cardHtml;
+                        // Добавляем новую карточку в контейнер
+                        const container = document.getElementById('effectsContainer');
+                        container.insertBefore(newCard, container.firstChild);
+                        // Добавляем обработчик для кнопки удаления
+                        const deleteBtn = newCard.querySelector('.delete-effect-btn');
+                        if (deleteBtn) {
+                            deleteBtn.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                const effectId = this.dataset.effectId;
+                                const effectType = this.dataset.effectType;
+                                fetch(`/delete_effect/${effectType}/${effectId}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    }
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.message) {
+                                        newCard.remove();
+                                        // Показываем уведомление об успехе
+                                        const alertDiv = document.createElement('div');
+                                        alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                                        alertDiv.innerHTML = `
+                                            Effect deleted successfully!
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                        `;
+                                        document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.row'));
+                                        setTimeout(() => { alertDiv.remove(); }, 3000);
+                                    }
+                                });
+                            });
+                        }
                     });
-                    
                     // Закрываем модальное окно
                     const modalElement = addEffectForm.closest('.modal');
                     const modal = bootstrap.Modal.getInstance(modalElement);
                     if (modal) {
                         modal.hide();
                     }
-                    
                     // Очищаем форму
                     addEffectForm.reset();
-                    
                     // Показываем уведомление об успехе
                     const alertDiv = document.createElement('div');
                     alertDiv.className = 'alert alert-success alert-dismissible fade show';
@@ -279,13 +294,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     `;
                     document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.row'));
-                    
-                    // Удаляем уведомление через 3 секунды
-                    setTimeout(() => {
-                        alertDiv.remove();
-                    }, 3000);
+                    setTimeout(() => { alertDiv.remove(); }, 3000);
                 } else if (data.error) {
-                    // Handle errors
                     alert('Error adding effect: ' + data.error);
                 } else {
                     alert('An unexpected error occurred.');
@@ -356,7 +366,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             document.body.classList.remove('modal-open');
             document.body.style.overflow = '';
-            document.body.style.paddingRight = '';
         });
     });
 
@@ -373,6 +382,42 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('publish-checkbox')) {
+            const effectId = e.target.dataset.effectId;
+            const effectType = e.target.dataset.effectType;
+            const isPublic = e.target.checked ? 1 : 0;
+            fetch(`/toggle_public/${effectType}/${effectId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_public: isPublic })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    // Можно показать уведомление об успехе
+                } else if (data.error) {
+                    alert('Ошибка публикации: ' + data.error);
+                }
+            });
+        }
+    });
+
+    // Кастомный backdrop для универсального модального окна
+    const effectModal = document.getElementById('effectModal');
+    if (effectModal) {
+        effectModal.addEventListener('show.bs.modal', function () {
+            let backdrop = document.createElement('div');
+            backdrop.className = 'custom-modal-backdrop show';
+            backdrop.id = 'customEffectBackdrop';
+            document.body.appendChild(backdrop);
+        });
+        effectModal.addEventListener('hidden.bs.modal', function () {
+            let backdrop = document.getElementById('customEffectBackdrop');
+            if (backdrop) backdrop.remove();
+        });
+    }
 });
 
 // Функция просмотра эффекта
@@ -415,13 +460,14 @@ function editEffect(type, id) {
         return response.json();
     })
     .then(effect => {
-        const modal = document.getElementById('editEffectModal');
+        const modal = document.getElementById('effectModal');
         document.getElementById('effectType').value = type;
         document.getElementById('effectId').value = id;
         document.getElementById('effectName').value = effect.name;
         document.getElementById('effectCode').value = effect.code || '';
         
-        const modalInstance = new bootstrap.Modal(modal);
+        // Открываем модалку без стандартного backdrop
+        const modalInstance = new bootstrap.Modal(modal, {backdrop: false});
         modalInstance.show();
     })
     .catch(error => {
@@ -431,7 +477,7 @@ function editEffect(type, id) {
 
 // Функция отправки формы редактирования
 function submitEditForm() {
-    const form = document.getElementById('editEffectForm');
+    const form = document.getElementById('effectForm');
     const formData = new FormData(form);
     const type = formData.get('effect_type');
     const id = formData.get('effect_id');
@@ -465,7 +511,7 @@ function submitEditForm() {
         }
         
         // Закрываем модальное окно
-        const modal = bootstrap.Modal.getInstance(document.getElementById('editEffectModal'));
+        const modal = bootstrap.Modal.getInstance(document.getElementById('effectModal'));
         modal.hide();
         
         // Показываем уведомление об успехе

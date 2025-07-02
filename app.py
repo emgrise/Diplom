@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from werkzeug.utils import secure_filename
 import urllib.parse
+from forms import EffectForm
 
 app = Flask(__name__, static_url_path='/static')
 app.secret_key = os.urandom(24)
@@ -325,7 +326,6 @@ def logout():
 def cabinet():
     db = get_db()
     cursor = db.cursor()
-    
     cursor.execute('''
         SELECT id, name, preview_image, code, effect_type, created_at, updated_at, is_public 
         FROM effects 
@@ -333,7 +333,6 @@ def cabinet():
         ORDER BY id ASC
     ''', (session['user_id'],))
     effects = cursor.fetchall()
-    
     formatted_effects = []
     for idx, effect in enumerate(effects):
         effect_dict = dict(effect)
@@ -343,136 +342,117 @@ def cabinet():
         effect_dict['has_code'] = bool(effect_dict['code'])
         effect_dict['index'] = idx
         formatted_effects.append(effect_dict)
-    
-    return render_template('cabinet.html', effects=formatted_effects)
+    form = EffectForm()
+    return render_template('cabinet.html', effects=formatted_effects, form=form)
 
-@app.route('/add_effect', methods=['POST'])
+@app.route('/add_effect', methods=['GET', 'POST'])
 @login_required
 @handle_errors
 def add_effect():
-    if 'name' not in request.form or 'code' not in request.form or 'effect_type' not in request.form:
-        raise ValueError('Missing required fields')
-        
-    name = request.form['name']
-    code = request.form['code']
-    effect_type = request.form['effect_type']
-    is_public = request.form.get('is_public', '0') == '1'
-    
-    db_effect_type = validate_effect_type(effect_type)
-    
-    if 'preview_image' not in request.files:
-        raise ValueError('No preview image provided')
-        
-    preview_image = request.files['preview_image']
-    if preview_image.filename == '':
-        raise ValueError('No selected file')
-        
-    filename = secure_filename(preview_image.filename)
-    preview_path = os.path.join('static', 'Data_pic', 'previews', filename)
-    os.makedirs(os.path.dirname(preview_path), exist_ok=True)
-    preview_image.save(preview_path)
-    
-    db = get_db()
-    cursor = db.cursor()
-    
-    cursor.execute('''
-        INSERT INTO effects (name, code, effect_type, preview_image, user_id, is_public)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (name, code, db_effect_type, filename, session['user_id'], is_public))
-    
-    db.commit()
-    
-    # Get the added effect
-    effect_id = cursor.lastrowid
-    cursor.execute('''
-        SELECT id, name, preview_image, code, effect_type, created_at, updated_at, is_public
-        FROM effects
-        WHERE id = ?
-    ''', (effect_id,))
-    
-    effect = cursor.fetchone()
-    effect_dict = dict(effect)
-    effect_dict['image'] = f'Data_pic/previews/{effect_dict["preview_image"]}'
-    effect_dict['url_type'] = db_effect_type
-    
-    return jsonify({
-        'message': 'Effect added successfully',
-        'effect': effect_dict
-    })
-
+    form = EffectForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        code = form.code.data
+        effect_type = form.effect_type.data
+        is_public = form.is_public.data
+        db_effect_type = validate_effect_type(effect_type)
+        preview_image = form.preview_image.data
+        if not preview_image:
+            raise ValueError('No preview image provided')
+        filename = secure_filename(preview_image.filename)
+        preview_path = os.path.join('static', 'Data_pic', 'previews', filename)
+        os.makedirs(os.path.dirname(preview_path), exist_ok=True)
+        preview_image.save(preview_path)
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('''
+            INSERT INTO effects (name, code, effect_type, preview_image, user_id, is_public)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (name, code, db_effect_type, filename, session['user_id'], is_public))
+        db.commit()
+        effect_id = cursor.lastrowid
+        cursor.execute('''
+            SELECT id, name, preview_image, code, effect_type, created_at, updated_at, is_public
+            FROM effects
+            WHERE id = ?
+        ''', (effect_id,))
+        effect = cursor.fetchone()
+        effect_dict = dict(effect)
+        effect_dict['image'] = f'Data_pic/previews/{effect_dict["preview_image"]}'
+        effect_dict['url_type'] = db_effect_type
+        return jsonify({
+            'message': 'Effect added successfully',
+            'effect': effect_dict
+        })
+    # Если не POST или невалидно, просто возвращаем кабинет с формой
+    return redirect(url_for('cabinet'))
 @app.route('/edit_effect/<effect_type>/<int:effect_id>', methods=['GET', 'POST'])
 @login_required
 @handle_errors
 def edit_effect(effect_type, effect_id):
     db_effect_type = validate_effect_type(effect_type)
-    
     db = get_db()
     cursor = db.cursor()
-    
     cursor.execute('''
         SELECT id, name, preview_image, code, effect_type, created_at, updated_at, is_public
         FROM effects
         WHERE id = ? AND user_id = ? AND effect_type = ?
     ''', (effect_id, session['user_id'], db_effect_type))
-    
     effect = cursor.fetchone()
     if not effect:
+
         raise ValueError('Effect not found')
-    
-    if request.method == 'POST':
-        effect_name = request.form.get('effect_name')
-        code = request.form.get('code')
-        
-        if not effect_name or not code:
-            raise ValueError('Name and code are required')
-        
-        preview_image = request.files.get('preview_image')
+    form = EffectForm()
+    if request.method == 'GET':
+        # Заполняем форму данными эффекта
+        form.effect_type.data = effect['effect_type']
+        form.name.data = effect['name']
+        form.code.data = effect['code']
+        form.is_public.data = effect['is_public']
+        form.effect_id.data = effect['id']
+        # preview_image не заполняем (файл)
+        return jsonify(dict(effect))
+    if form.validate_on_submit():
+        effect_name = form.name.data
+        code = form.code.data
+        is_public = form.is_public.data
+        preview_image = form.preview_image.data
         if preview_image and preview_image.filename:
-            filename = preview_image.filename
+            filename = secure_filename(preview_image.filename)
             previews_dir = os.path.join('static', 'Data_pic', 'previews')
             os.makedirs(previews_dir, exist_ok=True)
-            
             if effect['preview_image']:
                 old_image_path = os.path.join('static', 'Data_pic', 'previews', effect['preview_image'])
                 if os.path.exists(old_image_path):
                     os.remove(old_image_path)
-            
             preview_image.save(os.path.join(previews_dir, filename))
-            
             cursor.execute('''
                 UPDATE effects
-                SET name = ?, preview_image = ?, code = ?, updated_at = datetime('now')
+                SET name = ?, preview_image = ?, code = ?, is_public = ?, updated_at = datetime('now')
                 WHERE id = ? AND user_id = ? AND effect_type = ?
-            ''', (effect_name, filename, code, effect_id, session['user_id'], db_effect_type))
+            ''', (effect_name, filename, code, is_public, effect_id, session['user_id'], db_effect_type))
         else:
             cursor.execute('''
                 UPDATE effects
-                SET name = ?, code = ?, updated_at = datetime('now')
+                SET name = ?, code = ?, is_public = ?, updated_at = datetime('now')
                 WHERE id = ? AND user_id = ? AND effect_type = ?
-            ''', (effect_name, code, effect_id, session['user_id'], db_effect_type))
-        
+            ''', (effect_name, code, is_public, effect_id, session['user_id'], db_effect_type))
         db.commit()
-        
         cursor.execute('''
             SELECT id, name, preview_image, code, effect_type, created_at, updated_at, is_public
             FROM effects
             WHERE id = ? AND user_id = ? AND effect_type = ?
         ''', (effect_id, session['user_id'], db_effect_type))
-        
         updated_effect = cursor.fetchone()
         effect_dict = dict(updated_effect)
         effect_dict['image'] = f'Data_pic/previews/{effect_dict["preview_image"]}'
         effect_dict['url_type'] = effect_type
-        
         return jsonify({
             'message': 'Effect updated successfully',
             'effect': effect_dict
         })
-    
-    effect_dict = dict(effect)
-    effect_dict['image'] = effect_dict['preview_image']
-    effect_dict['url_type'] = effect_type
-    return jsonify(effect_dict)
+    # Если не POST или невалидно, просто возвращаем кабинет с формой
+    return redirect(url_for('cabinet'))
 
 @app.route('/delete_effect/<effect_type>/<int:effect_id>', methods=['POST'])
 @login_required
@@ -519,6 +499,27 @@ def delete_effect(effect_type, effect_id):
         'message': 'Effect deleted successfully',
         'effect': effect_dict
     })
+
+@app.route('/render_effect_card', methods=['POST'])
+@login_required
+def render_effect_card():
+    effect = request.json.get('effect')
+    return render_template('effect_card.html', item=effect, context='cabinet')
+
+@app.route('/toggle_public/<effect_type>/<int:effect_id>', methods=['POST'])
+@login_required
+def toggle_public(effect_type, effect_id):
+    db_effect_type = validate_effect_type(effect_type)
+    db = get_db()
+    cursor = db.cursor()
+    is_public = request.json.get('is_public', 0)
+    cursor.execute('''
+        UPDATE effects
+        SET is_public = ?
+        WHERE id = ? AND user_id = ? AND effect_type = ?
+    ''', (is_public, effect_id, session['user_id'], db_effect_type))
+    db.commit()
+    return jsonify({'message': 'Статус публикации обновлён'})
 
 if __name__ == '__main__':
     app.run(debug=True)
