@@ -87,7 +87,7 @@ body::after {
     animation: particleFloat 20s linear infinite;
 }
 
-header {
+nav {
     background-color: var(--header-bg);
     border-bottom: 1px solid var(--border-color);
     padding: 1rem 0;
@@ -96,21 +96,20 @@ header {
     z-index: 1000;
 }
 
-header::before {
+nav::before {
     content: "";
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+    background: var(--header-bg);
     opacity: 0.8;
     z-index: -1;
     transform: skewY(-2deg) translateY(-30%);
     filter: blur(20px);
 }
-
-header h1 {
+nav h1 {
     font-size: 2.5rem;
     font-weight: 800;
     letter-spacing: -0.5px;
@@ -188,120 +187,56 @@ header h1 {
     transform: scaleX(1);
 }
 
+/* Theme toggle styles */
+.theme-toggle {
+    position: relative;
+}
+
+.theme-toggle button {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.theme-toggle button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+}
+
+/* Loading animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
 }
+
 @keyframes fadeInDown {
     from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
 @keyframes backgroundPulse {
     0% { background-position: 0% 0%; }
-    100% { background-position: 100% 100%; }
+    50% { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
 }
+
 @keyframes particleFloat {
-    0% { background-position: 0 0; }
-    100% { background-position: 100px 100px; }
+    0% { transform: translateY(0px); }
+    100% { transform: translateY(-100px); }
 }
 
-body,
-header,
-.footer,
-.navbar,
-.card,
-.modal-content,
-.btn,
-.form-control {
-    transition: background-color 0.3s ease,
-                color 0.3s ease,
-                border-color 0.3s ease,
-                box-shadow 0.3s ease;
-}
-
-.theme-toggle {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-}
-
-.theme-toggle button {
-    background-color: transparent;
-    border: 2px solid var(--border-color);
-    color: var(--text-color);
-    padding: 0.5rem;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.theme-toggle button:hover {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: white;
-    transform: rotate(180deg);
-}
-
-.page-loader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--background-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    transition: opacity 0.5s ease;
-}
-
-.loader-content {
-    text-align: center;
-}
-
-.loader-content i {
-    color: var(--primary-color);
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-}
-
-.loading {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-.loading::after {
-    content: '';
-    width: 50px;
-    height: 50px;
-    border: 5px solid var(--border-color);
-    border-top-color: var(--primary-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
+/* Responsive styles */
 @media (max-width: 768px) {
     header h1 { font-size: 2rem; }
     .theme-toggle { position: static; margin-top: 1rem; }

@@ -88,7 +88,7 @@ class="has-sidebar"
                        data-effect-type="{{ item.url_type }}"
                        {% if item.is_public %}checked{% endif %}>
                 <label class="form-check-label" for="publishCheck_{{ item.id }}">
-                    Публично
+                    Public
                 </label>
             </div>
         {% else %}
@@ -154,35 +154,35 @@ class="has-sidebar"
 </div>
 
 <!-- Универсальное модальное окно для добавления/редактирования эффекта -->
-<div class="modal fade" id="effectModal" tabindex="-1" aria-labelledby="effectModalLabel" aria-hidden="true">
+<div class="modal fade" id="effectModal" tabindex="-1" aria-labelledby="effectModalLabel" aria-hidden="true" style="z-index: 10000 !important;">
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="effectForm" enctype="multipart/form-data">
         <div class="modal-header">
-          <h5 class="modal-title" id="effectModalLabel">Эффект</h5>
+          <h5 class="modal-title" id="effectModalLabel">Effect</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
         </div>
         <div class="modal-body">
           <input type="hidden" id="effectType" name="effect_type">
           <input type="hidden" id="effectId" name="effect_id">
           <div class="mb-3">
-            <label for="effectName" class="form-label">Название эффекта</label>
+            <label for="effectName" class="form-label">Name</label>
             <input type="text" class="form-control" id="effectName" name="name" required>
           </div>
           <div class="mb-3">
-            <label for="effectImage" class="form-label">Превью (картинка)</label>
+            <label for="effectImage" class="form-label">Preview</label>
             <input type="file" class="form-control" id="effectImage" name="preview_image" accept="image/*">
-            <div class="form-text">Загрузите изображение-превью эффекта.</div>
+            <div class="form-text">Download image</div>
           </div>
           <div class="mb-3">
-            <label for="effectCode" class="form-label">Код эффекта</label>
+            <label for="effectCode" class="form-label">Code</label>
             <textarea class="form-control" id="effectCode" name="code" rows="10" required></textarea>
-            <div class="form-text">Введите HTML/CSS/JavaScript код эффекта.</div>
+            <div class="form-text">Enter HTML/CSS/JavaScript code.</div>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-          <button type="submit" class="btn btn-primary">Сохранить</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save</button>
         </div>
       </form>
     </div>
@@ -264,41 +264,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                 .then(data => {
                                     if (data.message) {
                                         newCard.remove();
-                                        // Показываем уведомление об успехе
-                                        const alertDiv = document.createElement('div');
-                                        alertDiv.className = 'alert alert-success alert-dismissible fade show';
-                                        alertDiv.innerHTML = `
-                                            Effect deleted successfully!
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                        `;
-                                        document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.row'));
-                                        setTimeout(() => { alertDiv.remove(); }, 3000);
                                     }
                                 });
                             });
                         }
                     });
-                    // Закрываем модальное окно
-                    const modalElement = addEffectForm.closest('.modal');
-                    const modal = bootstrap.Modal.getInstance(modalElement);
-                    if (modal) {
-                        modal.hide();
-                    }
-                    // Очищаем форму
-                    addEffectForm.reset();
-                    // Показываем уведомление об успехе
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'alert alert-success alert-dismissible fade show';
-                    alertDiv.innerHTML = `
-                        Effect added successfully!
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    `;
-                    document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.row'));
-                    setTimeout(() => { alertDiv.remove(); }, 3000);
-                } else if (data.error) {
-                    alert('Error adding effect: ' + data.error);
-                } else {
-                    alert('An unexpected error occurred.');
+                    
                 }
             })
             .catch(error => {
@@ -329,14 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
                    if (effectItem) {
                        effectItem.remove();
                    }
-                   // Show success message
-                   const alertDiv = document.createElement('div');
-                   alertDiv.className = 'alert alert-success alert-dismissible fade show';
-                   alertDiv.innerHTML = `
-                       Effect deleted successfully!
-                       <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                   `;
-                   document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.row'));
+                   
                    
                    // Remove notification after 3 seconds
                    setTimeout(() => {
@@ -514,34 +478,8 @@ function submitEditForm() {
         const modal = bootstrap.Modal.getInstance(document.getElementById('effectModal'));
         modal.hide();
         
-        // Показываем уведомление об успехе
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-success alert-dismissible fade show';
-        alertDiv.innerHTML = `
-            Effect updated successfully!
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.row'));
+       
         
-        // Удаляем уведомление через 3 секунды
-        setTimeout(() => {
-            alertDiv.remove();
-        }, 3000);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-danger alert-dismissible fade show';
-        alertDiv.innerHTML = `
-            ${error.message || 'An error occurred while updating the effect. Please try again.'}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.row'));
-        
-        // Удаляем уведомление через 5 секунд
-        setTimeout(() => {
-            alertDiv.remove();
-        }, 5000);
     });
 }
 </script>

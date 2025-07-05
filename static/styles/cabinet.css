@@ -51,11 +51,11 @@
         padding: 2rem 1rem;
     }
 } 
-modal-dialog {
-    z-index: 10;
+#effectModal {
+    z-index: 15;
 }
 .modal-backdrop {
-    --bs-backdrop-zindex: 5;
+    --bs-backdrop-zindex: 0;
 
 }
 
@@ -66,10 +66,13 @@ modal-dialog {
     width: 100vw;
     height: 100vh;
     background: rgba(30, 30, 40, 0.7); /* тёмный полупрозрачный */
-    z-index: -1;
+    z-index: -5;
     opacity: 0;
     transition: opacity 0.3s;
 }
 .custom-modal-backdrop.show {
     opacity: 1;
+}
+form{
+    z-index: 100;
 }
